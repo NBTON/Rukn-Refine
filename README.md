@@ -54,16 +54,6 @@ If a user wants to open a **flower shop**, the app will:
 
 ---
 
-## 📂 Project Structure
-
-    /client         → React Native frontend
-    /server         → Node.js backend (Express)
-    /ml             → Python scripts for machine learning
-    .env.example    → Sample environment file
-    README.md
-
----
-
 ## 🔐 Environment Variables
 
 Create a `.env` file in your root directory with the following:
@@ -73,7 +63,7 @@ Create a `.env` file in your root directory with the following:
     GOOGLE_API_KEY=your_google_places_api_key
     JWT_SECRET=your_jwt_secret
 
-**Important:** Do **not** upload your real `.env` file to GitHub. Add `.env` to your `.gitignore`.
+**Important:** Do **not** upload your real `.env` file to GitHub.
 
 ---
 
@@ -81,39 +71,25 @@ Create a `.env` file in your root directory with the following:
 
 ### 1. Clone the repository
 
-    git clone https://github.com/your-username/your-repo-name.git
-    cd your-repo-name
+    git clone https://github.com/MQHANAD/RuknApp.git
+    cd RuknApp
+    npm install
 
-### 2. Install dependencies
+### 2. Run the app
 
 **Frontend:**
 
-    cd client
-    npm install
-
-**Backend:**
-
-    cd server
-    npm install
-
-### 3. Run the app
-
-**Frontend:**
-
-    npm start
-
-**Backend:**
-
-    npm run dev
+    npx expo start
 
 ---
 
 ## 👥 Team Members
 
-- [Your Name] – Mobile Developer / Team Lead
-- [Teammate 1] – Backend Developer
-- [Teammate 2] – ML Engineer
-- [Teammate 3] – UI/UX Designer
+- [Muhannad Alduraywish] – Mobile Developer
+- [OMAR ALSHAHRANI] – Project Manager
+- [HAMZA BAAQIL] – Mobile Developer
+- [FERAS ALBADER] – ML/data Engineer
+- [MOHAMMED ASIRI] – ML/data Engineer
 
 ---
 
