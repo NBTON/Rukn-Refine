@@ -1,60 +1,136 @@
-import React from "react";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs } from "expo-router";
-import { Pressable } from "react-native";
+import { View, Image, Text } from "react-native";
+import React, { useState } from "react";
+import { Tabs } from "expo-router";
+import { icons } from "../../constants";
 
-import Colors from "@/constants/Colors";
-import { useColorScheme } from "@/components/useColorScheme";
-import { useClientOnlyValue } from "@/components/useClientOnlyValue";
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+interface TabIconProps {
+  icon: any; // The source of the icon (e.g., from require() or a URI)
+  color: string; // The color of the icon or text
+  name: string; // The label for the tab
+  focused: boolean; // Whether the tab is focused or active
 }
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+const TabIcon: React.FC<TabIconProps> = ({ icon, color, name, focused }) => {
+  return (
+    <View style={{ alignItems: "center", justifyContent: "center", gap: 4 }}>
+      <Image
+        source={icon}
+        resizeMode="contain"
+        style={{
+          width: 24,
+          height: 24,
+          tintColor: color,
+          marginTop: 30,
+        }}
+      />
+      <Text
+        style={{
+          //fontFamily: focused ? "Poppins-SemiBold" : "Poppins-Regular",
+          fontSize: 9,
+          color: color,
+          width: 90,
+          textAlign: "center",
+        }}
+        numberOfLines={1}
+      >
+        {name}
+      </Text>
+    </View>
+  );
+};
 
+const TabsLayout = () => {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: "#F5A623",
+        tabBarInactiveTintColor: "#ffffff",
+        tabBarStyle: {
+          backgroundColor: "#1E2A38",
+          borderTopWidth: 1,
+          borderBottomColor: "#232533",
+          height: 84,
+        },
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
-          title: "Tab One",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? "light"].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+          title: "Home",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.home}
+              color={color}
+              name={"Home"}
+              focused={focused}
+            />
           ),
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="favorite"
         options={{
-          title: "Tab Two",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: "Favorite",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.heart}
+              color={color}
+              name={"Favorite"}
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: "Map",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.mapPin}
+              color={color}
+              name={"Map"}
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: "Chat",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.chat}
+              color={color}
+              name={"Chat"}
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.userCircle}
+              color={color}
+              name={"Profile"}
+              focused={focused}
+            />
+          ),
         }}
       />
     </Tabs>
   );
-}
+};
+
+export default TabsLayout;
