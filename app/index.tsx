@@ -1,65 +1,125 @@
 import { router } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import {
-  Alert,
   Animated,
   Dimensions,
-  ScrollView,
+  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
+const BOTTOM_OVERLAY_HEIGHT = height * 0.4;
 
-// Array of onboarding pages.
-const onboardingData = [
+// Define the shape of each onboarding item.
+interface OnboardingItem {
+  image: any;
+  title: string;
+  subtitle: string;
+  height: number;
+  bottom: number;
+}
+
+const onboardingData: OnboardingItem[] = [
   {
     image: require('../assets/images/logo.png'),
     title: 'Unleash Your Creativity',
-    subtitle:
-      'Explore market places and create your own masterpiece.',
+    subtitle: 'Explore market places and create your own masterpiece.',
     height: 400,
-    bottom: 310,
+    bottom: 280,
   },
   {
     image: require('../assets/images/CUi.png'),
     title: 'Personalize Your Experience',
-    subtitle: 'Create Your perfect market place.',
-    height: 700,
-    bottom: 160,
+    subtitle: 'Create your perfect market place.',
+    height: 640,
+    bottom: 150,
   },
   {
     image: require('../assets/images/UI.png'),
     title: 'Get Started',
     subtitle: 'Join Us In Rukn And Let Your Creativity Flow!',
-    height: 700,
-    bottom: 160,
+    height: 640,
+    bottom: 150,
   },
 ];
 
-const OnboardingScreen = () => {
-  // Animated value for horizontal scroll.
-  const scrollX = useRef(new Animated.Value(0)).current;
-  // Local state to track the current page index.
-  const [currentPage, setCurrentPage] = useState(0);
+// Single Onboarding Slide Component
+interface OnboardingSlideProps {
+  item: OnboardingItem;
+  index: number;
+  scrollX: Animated.Value;
+}
 
-  // Handler to update current page index when scrolling stops.
-  const handleMomentumScrollEnd = (e: { nativeEvent: { contentOffset: { x: number; }; }; }) => {
+const OnboardingSlide: React.FC<OnboardingSlideProps> = ({ item, index, scrollX }) => {
+  // Calculate the scale factor for the image based on the scroll position.
+  const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
+  const scale = scrollX.interpolate({
+    inputRange,
+    outputRange: [0.8, 1, 0.8],
+    extrapolate: 'clamp',
+  });
+
+  return (
+    <View style={[styles.page, { width }]}>
+      <Animated.Image
+        source={item.image}
+        style={[
+          styles.image,
+          {
+            height: item.height,
+            bottom: item.bottom,
+            transform: [{ scale }],
+          },
+        ]}
+      />
+    </View>
+  );
+};
+
+const OnboardingScreen = () => {
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const [currentPage, setCurrentPage] = useState<number>(0);
+
+  // Animated value for fading text content when the page changes.
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  // Update current page index when scrolling stops and animate text fade transition.
+  const handleMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const pageIndex = Math.round(e.nativeEvent.contentOffset.x / width);
+    // Animate text fading out and back in after page change.
+    Animated.sequence([
+      Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 150, useNativeDriver: true }),
+    ]).start();
     setCurrentPage(pageIndex);
   };
 
-  // Handler for "Get Started" button tap.
+  // Navigation function when pressing the "Get Started" button.
   const handleGetStarted = () => {
-    // TODO: Navigate to your main/home screen.
-    router.push("/one")
+    // Optionally, add tracking or validations before navigating.
+    router.push('/sign-in');
   };
 
+  // Memoize the indicator dots to avoid unnecessary re-renders.
+  const renderIndicators = useMemo(() => {
+    return onboardingData.map((_, i) => (
+      <View
+        key={i}
+        style={[
+          styles.indicator,
+          i === currentPage && styles.activeIndicator,
+        ]}
+      />
+    ));
+  }, [currentPage]);
+
   return (
-    <View style={styles.container}>
-      {/* Animated horizontal scroll view */}
+    <SafeAreaView style={styles.container}>
       <Animated.ScrollView
         horizontal
         pagingEnabled
@@ -71,43 +131,24 @@ const OnboardingScreen = () => {
         )}
         scrollEventThrottle={16}
       >
-        {onboardingData.map((item, index) => {
-          // Create an interpolation for the image scale based on scrollX.
-          const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
-          const scale = scrollX.interpolate({
-            inputRange,
-            outputRange: [0.8, 1, 0.8],
-            extrapolate: 'clamp',
-          });
-
-          return (
-            <View key={index} style={[styles.page, { width }]}>
-              <Animated.Image
-                source={item.image}
-                style={[
-                  styles.image,
-                  {
-                    height: item.height,
-                    bottom: item.bottom,
-                    transform: [{ scale }],
-                  },
-                ]}
-              />
-            </View>
-          );
-        })}
+        {onboardingData.map((item, index) => (
+          <OnboardingSlide key={index} item={item} index={index} scrollX={scrollX} />
+        ))}
       </Animated.ScrollView>
 
-      {/* White bottom overlay (similar to Flutter's positioned white container) */}
-      <View style={styles.bottomOverlay} />
+      {/* White bottom overlay with touches passing through */}
+      <View
+        style={[styles.bottomOverlay, { height: BOTTOM_OVERLAY_HEIGHT }]}
+        pointerEvents="none"
+      />
 
-      {/* Text content displayed above the bottom overlay */}
-      <View style={styles.textContainer}>
+      {/* Animated text content */}
+      <Animated.View style={[styles.textContainer, { opacity: fadeAnim }]}>
         <Text style={styles.title}>{onboardingData[currentPage].title}</Text>
         <Text style={styles.subtitle}>{onboardingData[currentPage].subtitle}</Text>
-      </View>
+      </Animated.View>
 
-      {/* "Get Started" button (only visible on the final page) */}
+      {/* "Get Started" button: only render on final onboarding page */}
       {currentPage === onboardingData.length - 1 && (
         <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
           <Text style={styles.buttonText}>Get Started</Text>
@@ -115,18 +156,8 @@ const OnboardingScreen = () => {
       )}
 
       {/* Indicator dots */}
-      <View style={styles.indicatorContainer}>
-        {onboardingData.map((_, i) => (
-          <View
-            key={i}
-            style={[
-              styles.indicator,
-              i === currentPage && styles.activeIndicator,
-            ]}
-          />
-        ))}
-      </View>
-    </View>
+      <View style={styles.indicatorContainer}>{renderIndicators}</View>
+    </SafeAreaView>
   );
 };
 
@@ -140,7 +171,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: '90%', // Adjust as needed; in Flutter there is horizontal padding.
+    width: '90%',
     resizeMode: 'contain',
     position: 'absolute',
     left: 24,
@@ -149,7 +180,6 @@ const styles = StyleSheet.create({
   bottomOverlay: {
     position: 'absolute',
     bottom: 0,
-    height: height * 0.4,
     width: '100%',
     backgroundColor: '#FFFFFF',
     opacity: 0.97,
@@ -182,8 +212,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    // For Android shadow (elevation) and iOS shadow properties.
-    elevation: 8,
+    elevation: 8, // Android shadow.
     shadowColor: 'grey',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
@@ -215,8 +244,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const App = () => {
-  return <OnboardingScreen />;
-};
+const App = () => <OnboardingScreen />;
 
 export default App;
