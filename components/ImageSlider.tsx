@@ -65,11 +65,11 @@ const ImageSlider: FC<ImageSliderProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {},
-  image: { width: "100%", height: 300, resizeMode: "center" },
+  container: {height:"110%"},
+  image: { width: "100%", height: "100%", resizeMode: "center" },
   overlay: {
     position: "absolute",
-    bottom: 10,
+    bottom: 60,
     left: 10,
     backgroundColor: "rgba(0,0,0,0.5)",
     paddingHorizontal: 8,
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   title: { color: "#fff", fontSize: 16 },
   indicatorContainer: {
     position: "absolute",
-    bottom: 60,
+    bottom: 40,
     left: 0,
     right: 0,
     flexDirection: "row",

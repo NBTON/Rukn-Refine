@@ -26,7 +26,7 @@ import { MARKETPLACES, MarketplaceItem } from "../../components/types";
 
 const { width, height } = Dimensions.get("window");
 const HEADER_HEIGHT = 300; // Height reserved for the image slider
-const CARD_TOP_OFFSET = HEADER_HEIGHT - 50; // Card shows a little of the image slider
+const CARD_TOP_OFFSET = HEADER_HEIGHT  ; // Card shows a little of the image slider
 const FIXED_HEADER_THRESHOLD = 150; // When to show the fixed header overlay
 
 const MarketScreen: FC = () => {
@@ -62,9 +62,9 @@ const MarketScreen: FC = () => {
   const handleScroll = useCallback(
     (evt: NativeSyntheticEvent<NativeScrollEvent>) => {
       const yOffset = evt.nativeEvent.contentOffset.y;
-      if (yOffset - 55 > FIXED_HEADER_THRESHOLD && !showFixedHeader) {
+      if (yOffset -20  > FIXED_HEADER_THRESHOLD && !showFixedHeader) {
         setShowFixedHeader(true);
-      } else if (yOffset - 55 <= FIXED_HEADER_THRESHOLD && showFixedHeader) {
+      } else if (yOffset -20 <= FIXED_HEADER_THRESHOLD && showFixedHeader) {
         setShowFixedHeader(false);
       }
     },
@@ -72,16 +72,9 @@ const MarketScreen: FC = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Fixed Background Image Slider */}
-      <View style={styles.imageSliderContainer}>
-        <ImageSlider
-          data={sliderData}
-          currentIndex={currentSlideIndex}
-          onSlideChange={handleSlideChange}
-          sliderRef={sliderRef}
-        />
-      </View>
+    <SafeAreaView style={styles.container} >
+      
+      
 
       {/* Fixed Search Bar */}
       <View style={styles.searchBarWrapper}>
@@ -105,6 +98,15 @@ const MarketScreen: FC = () => {
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
+        {/* Fixed Background Image Slider */}
+      <View style={styles.imageSliderContainer}>
+        <ImageSlider
+          data={sliderData}
+          currentIndex={currentSlideIndex}
+          onSlideChange={handleSlideChange}
+          sliderRef={sliderRef}
+        />
+      </View>
         <View style={styles.card}>
           <FilterHeader />
           <FlatList
@@ -134,10 +136,10 @@ const styles = StyleSheet.create({
   },
   searchBarWrapper: {
     position: "absolute",
-    top: 10,
+    top: 70,
     left: 16,
     right: 16,
-    zIndex: 0, // Renders above the slider.
+    zIndex: 20, // Renders above the slider.
   },
   fixedHeaderOverlayWrapper: {
     position: "absolute",
@@ -164,7 +166,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 16,
+    padding: 5,
     paddingBottom: 20,
     elevation: 10,
   },

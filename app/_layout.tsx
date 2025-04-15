@@ -9,6 +9,8 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
+import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useColorScheme } from "@/components/useColorScheme";
 
@@ -53,6 +55,8 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+    
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack screenOptions={{ gestureEnabled: true }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -63,5 +67,7 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
+    
+  </GestureHandlerRootView>
   );
 }

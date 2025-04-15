@@ -1,33 +1,47 @@
 // FixedHeaderOverlay.tsx
 import React, { FC } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import SearchBar from "./SearchBar";
+import { icons } from "../constants";
 
 const FixedHeaderOverlay: FC = () => {
   return (
     <View style={styles.container}>
-      <SearchBar />
-      <View style={styles.filterRow}>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Filter</Text>
-        </TouchableOpacity>
-        <Text style={styles.appliedText}>5 Filters Applied</Text>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Sort</Text>
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.idea}>Selected Idea: Clothing Store</Text>
-    </View>
+          <View style={styles.filterRow}>
+            <TouchableOpacity style={styles.button}>
+              <Image style={styles.icon} source={icons.sort} />
+              <View style={styles.textColumn}>
+                <Text style={styles.filterText}>Sort</Text>
+                <Text style={styles.subText}>Sorted by price</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Image style={styles.icon} source={icons.filters} />
+              <View style={styles.textColumn}>
+                <Text style={styles.filterText}>Filter</Text>
+                <Text style={styles.subText}>3 Filters Applied</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Image style={styles.icon} source={icons.idea} />
+              <View style={styles.textColumn}>
+                <Text style={styles.filterText}>Selected Idea</Text>
+                <Text style={styles.subText}>flower shop</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    paddingRight:15,
+    borderBottomWidth: 0.7,
+    borderBottomColor: "grey",
+    paddingTop:120,
+    
   },
   filterRow: {
     flexDirection: "row",
@@ -36,14 +50,34 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   button: {
-    backgroundColor: "#eee",
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
     paddingHorizontal: 12,
-    paddingVertical: 6,
     borderRadius: 8,
   },
   buttonText: { fontSize: 14, color: "#333" },
   appliedText: { fontSize: 14, color: "gray" },
   idea: { fontSize: 16, color: "#333", textAlign: "center" },
+  icon: {
+    width: 24,
+    height: 24,
+    resizeMode: "contain",
+    marginRight: 8,
+  },
+  textColumn: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+  },
+  filterText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  subText: {
+    fontSize: 12,
+    color: "grey",
+  },
 });
 
 export default FixedHeaderOverlay;
