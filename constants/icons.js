@@ -7,6 +7,7 @@ import search from "../assets/icons/search.png"
 import filters from "../assets/icons/filters.png"
 import idea from "../assets/icons/idea.png"
 import sort from "../assets/icons/sort.png"
+import heart2 from "../assets/icons/heart2.png";
 
 export default {
   home,
@@ -18,4 +19,5 @@ export default {
   filters,
   idea,
   sort,
+  heart2,
 };
