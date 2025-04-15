@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     resizeMode: "contain",
-    marginRight: 8,
+    marginRight: 4,
   },
   textColumn: {
     flexDirection: "column",

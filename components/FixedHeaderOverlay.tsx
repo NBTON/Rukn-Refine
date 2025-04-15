@@ -1,7 +1,6 @@
 // FixedHeaderOverlay.tsx
 import React, { FC } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
-import SearchBar from "./SearchBar";
 import { icons } from "../constants";
 
 const FixedHeaderOverlay: FC = () => {
@@ -38,9 +37,13 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
     paddingRight:15,
-    borderBottomWidth: 0.7,
+    borderBottomWidth: 0.5,
     borderBottomColor: "grey",
     paddingTop:120,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
     
   },
   filterRow: {
@@ -64,7 +67,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     resizeMode: "contain",
-    marginRight: 8,
+    marginRight: 4,
   },
   textColumn: {
     flexDirection: "column",

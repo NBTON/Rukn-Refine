@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useCallback,
   useRef,
-  useEffect,
+
 } from "react";
 import {
   View,
@@ -16,13 +16,14 @@ import {
   NativeScrollEvent,
   FlatList,
   ScrollView,
+  Image,
 } from "react-native";
 import SearchBar from "../../components/SearchBar";
 import ImageSlider from "../../components/ImageSlider";
 import MarketCard from "../../components/MarketCard";
 import FixedHeaderOverlay from "../../components/FixedHeaderOverlay";
 import FilterHeader from "../../components/FilterHeader";
-import { MARKETPLACES, MarketplaceItem } from "../../components/types";
+import { MARKETPLACES, MarketplaceItem, images } from "../../components/types";
 
 const { width, height } = Dimensions.get("window");
 const HEADER_HEIGHT = 300; // Height reserved for the image slider
@@ -31,32 +32,6 @@ const FIXED_HEADER_THRESHOLD = 150; // When to show the fixed header overlay
 
 const MarketScreen: FC = () => {
   const [showFixedHeader, setShowFixedHeader] = useState(false);
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const sliderRef = useRef<ScrollView>(null);
-  // Prepare slider data (e.g., the top three items).
-  const sliderData = useMemo<MarketplaceItem[]>(
-    () => MARKETPLACES.slice(0, 3),
-    []
-  );
-
-  const handleSlideChange = useCallback(
-    (evt: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const index = Math.round(evt.nativeEvent.contentOffset.x / width);
-      setCurrentSlideIndex(index);
-    },
-    []
-  );
-  // Auto-update slider every 8 seconds.
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentSlideIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % sliderData.length;
-        sliderRef.current?.scrollTo({ x: nextIndex * width, animated: true });
-        return nextIndex;
-      });
-    }, 8000);
-    return () => clearInterval(intervalId);
-  }, [sliderData.length, width]);
 
   // Handle scrolling of the card.
   const handleScroll = useCallback(
@@ -100,12 +75,7 @@ const MarketScreen: FC = () => {
       >
         {/* Fixed Background Image Slider */}
       <View style={styles.imageSliderContainer}>
-        <ImageSlider
-          data={sliderData}
-          currentIndex={currentSlideIndex}
-          onSlideChange={handleSlideChange}
-          sliderRef={sliderRef}
-        />
+        <Image source={images["../assets/images/dummy1.png"]} style={styles.backgroundImage}/>
       </View>
         <View style={styles.card}>
           <FilterHeader />
@@ -133,6 +103,9 @@ const styles = StyleSheet.create({
     right: 0,
     height: HEADER_HEIGHT,
     zIndex: 0, // Rendered in the background.
+  },
+  backgroundImage:{
+    width: "100%", height: "108%", resizeMode: "cover"
   },
   searchBarWrapper: {
     position: "absolute",

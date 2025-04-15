@@ -1,5 +1,5 @@
 // ImageSlider.tsx
-import React, { FC } from "react";
+import React, { FC, useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   ScrollView,
@@ -10,7 +10,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from "react-native";
-import { MarketplaceItem, images } from "./types";
+import { MARKETPLACES, MarketplaceItem, images } from "./types";
 
 const { width } = Dimensions.get("window");
 
@@ -27,13 +27,45 @@ const ImageSlider: FC<ImageSliderProps> = ({
   onSlideChange,
   sliderRef,
 }) => {
+  // Keep track of the current slide index
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+
+  // Use memoized slider data (e.g., only the top three items)
+  const sliderData = useMemo<MarketplaceItem[]>(
+    () => MARKETPLACES.slice(0, 3),
+    []
+  );
+
+  // Auto-update the slider every 8 seconds
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentSlideIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % sliderData.length;
+        sliderRef.current?.scrollTo({ x: nextIndex * width, animated: true });
+        return nextIndex;
+      });
+    }, 8000);
+
+    return () => clearInterval(intervalId);
+  }, [sliderData.length, width, sliderRef]);
+
+  // Update index on manual scrolling and call parent's callback.
+  const handleSlideChange = useCallback(
+    (evt: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const index = Math.round(evt.nativeEvent.contentOffset.x / width);
+      setCurrentSlideIndex(index);
+      onSlideChange(evt);
+    },
+    [onSlideChange]
+  );
+
   return (
     <View style={styles.container}>
       <ScrollView
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={onSlideChange}
+        onMomentumScrollEnd={handleSlideChange}
         ref={sliderRef}
       >
         {data.map((item) => (
@@ -55,7 +87,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
             key={index}
             style={[
               styles.indicator,
-              index === currentIndex && styles.activeIndicator,
+              index === currentSlideIndex && styles.activeIndicator,
             ]}
           />
         ))}
@@ -65,8 +97,14 @@ const ImageSlider: FC<ImageSliderProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {height:"110%"},
-  image: { width: "100%", height: "100%", resizeMode: "center" },
+  container: {
+    height: "110%",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "center",
+  },
   overlay: {
     position: "absolute",
     bottom: 60,
@@ -76,7 +114,10 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 4,
   },
-  title: { color: "#fff", fontSize: 16 },
+  title: {
+    color: "#fff",
+    fontSize: 16,
+  },
   indicatorContainer: {
     position: "absolute",
     bottom: 40,
@@ -93,7 +134,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#ddd",
     marginHorizontal: 4,
   },
-  activeIndicator: { backgroundColor: "#333" },
+  activeIndicator: {
+    backgroundColor: "#333",
+  },
 });
 
 export default ImageSlider;

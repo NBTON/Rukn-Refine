@@ -37,7 +37,9 @@ const PhoneVerificationScreen = () => {
             require("../../assets/images/logo.png") // Dummy logo URI
           }
           resizeMode="contain"
+
         />
+        
 
         {/* Phone Number Input */}
         <View style={styles.inputContainer}>
@@ -64,30 +66,30 @@ const PhoneVerificationScreen = () => {
 
 export default PhoneVerificationScreen;
 
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
   },
   container: {
     flex: 1,
     paddingHorizontal: 24,
-    alignItems: "center",
+    alignItems: 'center',
   },
   logo: {
     height: 400,
-    marginBottom: -90,
+    marginBottom:-90,
   },
   inputContainer: {
-    width: "100%",
+    width: '100%',
     marginBottom: 20,
     height: 70,
   },
   input: {
-    width: "100%",
-    backgroundColor: "#F5F5F5",
+    width: '100%',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: "#F5A623",
+    borderColor: '#EFEFEF',
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -95,14 +97,14 @@ export const styles = StyleSheet.create({
     height: 60,
   },
   button: {
-    width: "100%",
-    backgroundColor: "#F5A623",
+    width: '100%',
+    backgroundColor: '#F5A623',
     paddingVertical: 16,
     borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent:"center",
     // Optional shadow for iOS and Android
-    shadowColor: "grey",
+    shadowColor: 'grey',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,
@@ -110,8 +112,8 @@ export const styles = StyleSheet.create({
     height: 60,
   },
   buttonText: {
-    color: "#FFFFFF",
+    color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });

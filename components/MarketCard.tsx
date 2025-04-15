@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     marginTop:8,
   },
-  image: { width: "100%", height: 150 },
+  image: { width: "100%", height: 150, resizeMode: "stretch", },
   info: { flex: 1, padding: 10, justifyContent: "space-between" },
   textTitle: { fontSize: 16, fontWeight: "bold", color: "#333", marginBottom: 5 },
   subText: { fontSize: 14, color: "#666" },

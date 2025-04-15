@@ -116,7 +116,8 @@ const OnboardingScreen = () => {
   // Navigation function when pressing the "Get Started" button.
   const handleGetStarted = () => {
     // Optionally, add tracking or validations before navigating.
-    router.push("/(tabs)/home");
+    //router.push("/(tabs)/home");
+    router.push("/favorite");
   };
 
   // Memoize the indicator dots to avoid unnecessary re-renders.
