@@ -36,7 +36,7 @@ const verificationScreen: React.FC = () => {
     if (newCode.every((digit) => digit !== "")) {
       console.log("The user entered:", newCode.join(""));
       // Add further logic here (e.g., API call or navigation)
-      router.push("/sign-up");
+      router.replace("/sign-up");
     }
   };
 

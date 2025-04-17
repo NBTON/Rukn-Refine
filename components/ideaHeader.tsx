@@ -25,12 +25,15 @@ const styles = StyleSheet.create({
     container: {
         position: "fixed",
         marginBottom: 10,
-        backgroundColor:"white",
-        paddingTop:45,
-        paddingBottom:5,
-        borderTopRightRadius:20,
-        borderTopLeftRadius:20,
-        
+        backgroundColor: "white",
+        paddingTop: 45,
+        paddingBottom: 5,
+        borderTopRightRadius: 20,
+        borderTopLeftRadius: 20,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
     },
     filterRow: {
         flexDirection: "row",
@@ -62,14 +65,14 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: "grey",
     },
-    title:{
-        flex:1,
+    title: {
+        flex: 1,
         fontSize: 24,
-        fontWeight:"bold",
-        justifyContent:"center",
-        alignItems:"center",
-        paddingLeft:20,
-        paddingTop:10,
+        fontWeight: "bold",
+        justifyContent: "center",
+        alignItems: "center",
+        paddingLeft: 20,
+        paddingTop: 10,
     }
 });
 

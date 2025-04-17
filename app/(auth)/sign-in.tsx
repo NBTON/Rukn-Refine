@@ -20,7 +20,7 @@ const PhoneVerificationScreen = () => {
     // TODO: Add your verification code sending logic here
     // e.g., sendVerificationCode(phoneNumber);
     console.log("Verification code sent");
-    router.push("/Verification");
+    router.replace("/Verification")
   };
 
   return (

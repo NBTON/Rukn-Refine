@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   View,
@@ -19,11 +20,13 @@ const SignUpScreen: React.FC = () => {
   const handleCreateAccount = () => {
     // Here, you can add validation, an API call, or navigation logic
     // For demonstration, we'll just show an alert with the data:
-    Alert.alert(
-      "Account Info",
-      `Name: ${fullName}\nEmail: ${email}\nBOD: ${bod}`
-    );
+    // Alert.alert(
+    //   "Account Info",
+    //   `Name: ${fullName}\nEmail: ${email}\nBOD: ${bod}`
+    // );
     console.log("User Info:", { fullName, email, bod });
+    router.dismissAll();
+    router.replace("/home")
   };
 
   return (

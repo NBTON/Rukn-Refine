@@ -117,7 +117,7 @@ const OnboardingScreen = () => {
   const handleGetStarted = () => {
     // Optionally, add tracking or validations before navigating.
     //router.push("/(tabs)/home");
-    router.push("/favorite");
+    router.push("/sign-in");
   };
 
   // Memoize the indicator dots to avoid unnecessary re-renders.

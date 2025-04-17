@@ -25,7 +25,7 @@ import IdeaHeader from "../../components/ideaHeader";
 import { MARKETPLACES, MarketplaceItem, images } from "../../components/types";
 
 const { width, height } = Dimensions.get("window");
-const HEADER_HEIGHT = 100; // Height reserved for the image slider
+const HEADER_HEIGHT = 300; // Height reserved for the image slider
 const CARD_TOP_OFFSET = HEADER_HEIGHT; // Card shows a little of the image slider
 
 
@@ -110,19 +110,19 @@ const styles = StyleSheet.create({
 
   // Content starts at an offset to reveal the image slider underneath initially.
   scrollViewContent: {
-    paddingTop: 75,
+    paddingTop:0,
     minHeight: height - CARD_TOP_OFFSET,
+    paddingBottom:40,
 
   },
   card: {
-    top: 45,
+    top: 100,
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 5,
-    paddingBottom: 20,
     elevation: 10,
-    paddingTop: 25,
+    paddingVertical:40,
   },
 });
 
