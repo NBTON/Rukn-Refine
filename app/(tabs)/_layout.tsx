@@ -84,7 +84,7 @@ const TabsLayout = () => {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="map"
         options={{
           title: "Map",
@@ -98,8 +98,8 @@ const TabsLayout = () => {
             />
           ),
         }}
-      />
-      <Tabs.Screen
+      /> */}
+      {/* <Tabs.Screen
         name="chat"
         options={{
           title: "Chat",
@@ -113,7 +113,7 @@ const TabsLayout = () => {
             />
           ),
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="profile"
         options={{
