@@ -1,6 +1,8 @@
 // types.ts
 export interface MarketplaceItem {
-  id: string;                           // business_id from database
+  id: string;                           // business_id from database as string
+  business_id?: number;                 // business_id from database as number
+  name?: string;                        // name from database (used in Supabase integration)
   title: string;                        // rating from database (displayed as star rating)
   price: string;                        // randomly generated price (25,000 - 100,000 range)
   size: string | null;                  // user_ratings_total from database
@@ -14,6 +16,10 @@ export interface MarketplaceItem {
   popularity_score?: string;            // popularity metric from database
   latitude?: string;                    // latitude coordinates
   longitude?: string;                   // longitude coordinates
+  rating?: number;                      // numerical rating value
+  numReviews?: number;                  // number of reviews
+  business_type?: string;               // alternative business type name
+  favorites_count?: number;             // count of how many users have favorited this business
   originalData?: any;                   // original data from Supabase
 }
 

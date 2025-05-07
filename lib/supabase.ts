@@ -1,6 +1,6 @@
 // A simple implementation to access Supabase without additional packages
-const EXPO_PUBLIC_SUPABASE_URL = 'https://vnvbjphwulwpdzfieyyo.supabase.co';
-const EXPO_PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZudmJqcGh3dWx3cGR6ZmlleXlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5NDA2ODcsImV4cCI6MjA2MTUxNjY4N30.qfTs0f4Y5dZIc4hlmitfhe0TOI1fFbdEAK1_9wxzTxY';
+export const EXPO_PUBLIC_SUPABASE_URL = 'https://vnvbjphwulwpdzfieyyo.supabase.co';
+export const EXPO_PUBLIC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZudmJqcGh3dWx3cGR6ZmlleXlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5NDA2ODcsImV4cCI6MjA2MTUxNjY4N30.qfTs0f4Y5dZIc4hlmitfhe0TOI1fFbdEAK1_9wxzTxY';
 
 // Store user session data
 const TOKEN_STORAGE_KEY = 'ruknapp_auth_token';
@@ -30,6 +30,13 @@ let currentSession: { access_token: string; user: UserProfile | null } | null = 
 
 // Basic fetch wrapper for Supabase REST API
 export const supabaseApi = {
+  // Helper method to get default headers for API requests
+  getDefaultHeaders() {
+    return {
+      'apikey': EXPO_PUBLIC_SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json'
+    };
+  },
   // Directly fetch from Businesses table without any fallback
   async fetchMarketplaces(page = 1, pageSize = 20) {
     try {
@@ -1038,5 +1045,252 @@ export const supabaseApi = {
       console.error('Update owner profile error:', error);
       throw error;
     }
-  }
+  },
+
+  // Favorites Management Methods
+
+  // Add a business to favorites for the current user
+  async addToFavorites(userId: number, businessId: number) {
+    if (!userId || !businessId) {
+      throw new Error('User ID and Business ID are required');
+    }
+
+    try {
+      // First, check if already in favorites
+      const exists = await this.checkFavoriteExists(userId, businessId);
+      if (exists) {
+        return { success: true, message: 'Already in favorites' };
+      }
+
+      // Add to favorites
+      const response = await fetch(`${EXPO_PUBLIC_SUPABASE_URL}/rest/v1/favorites`, {
+        method: 'POST',
+        headers: {
+          ...this.getDefaultHeaders(),
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          entrepreneur_id: userId,
+          shop_id: businessId,
+          created_at: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to add favorite: ${response.statusText}`);
+      }
+
+      // After successfully adding to favorites, increment the favorites_count for the business
+      await this.incrementBusinessFavoritesCount(businessId);
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error adding to favorites:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  },
+
+  // Remove a business from favorites for the current user
+  async removeFromFavorites(userId: number, businessId: number) {
+    if (!userId || !businessId) {
+      throw new Error('User ID and Business ID are required');
+    }
+
+    try {
+      const response = await fetch(
+        `${EXPO_PUBLIC_SUPABASE_URL}/rest/v1/favorites?entrepreneur_id=eq.${userId}&shop_id=eq.${businessId}`,
+        {
+          method: 'DELETE',
+          headers: this.getDefaultHeaders()
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to remove favorite: ${response.statusText}`);
+      }
+
+      // After successfully removing from favorites, decrement the favorites_count for the business
+      await this.decrementBusinessFavoritesCount(businessId);
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error removing from favorites:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  },
+
+  // Check if a business is in the user's favorites
+  async checkFavoriteExists(userId: number, businessId: number): Promise<boolean> {
+    try {
+      const response = await fetch(
+        `${EXPO_PUBLIC_SUPABASE_URL}/rest/v1/favorites?entrepreneur_id=eq.${userId}&shop_id=eq.${businessId}`,
+        {
+          method: 'GET',
+          headers: this.getDefaultHeaders()
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to check favorite: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.length > 0;
+    } catch (error) {
+      console.error('Error checking favorite:', error);
+      return false;
+    }
+  },
+
+  // Get all favorites for the current user
+  async getUserFavorites(userId: number) {
+    try {
+      // First get the favorite business IDs
+      const favoritesResponse = await fetch(
+        `${EXPO_PUBLIC_SUPABASE_URL}/rest/v1/favorites?entrepreneur_id=eq.${userId}&select=shop_id`,
+        {
+          method: 'GET',
+          headers: this.getDefaultHeaders()
+        }
+      );
+
+      if (!favoritesResponse.ok) {
+        throw new Error(`Failed to fetch favorites: ${favoritesResponse.statusText}`);
+      }
+
+      const favorites = await favoritesResponse.json();
+      const businessIds = favorites.map((fav: any) => fav.shop_id);
+
+      if (businessIds.length === 0) {
+        return [];
+      }
+
+      // Then fetch the business details
+      const businessesQuery = businessIds.map((id: number) => `business_id=eq.${id}`).join(',');
+      const businessesResponse = await fetch(
+        `${EXPO_PUBLIC_SUPABASE_URL}/rest/v1/businesses?${businessesQuery}`,
+        {
+          method: 'GET',
+          headers: this.getDefaultHeaders()
+        }
+      );
+
+      if (!businessesResponse.ok) {
+        throw new Error(`Failed to fetch business details: ${businessesResponse.statusText}`);
+      }
+
+      return await businessesResponse.json();
+    } catch (error) {
+      console.error('Error getting user favorites:', error);
+      throw error;
+    }
+  },
+
+  // Get the favorites count for a business by counting entries in favorites table
+  async getBusinessFavoritesCount(businessId: number): Promise<number> {
+    try {
+      // First check if shops table has favorites_count column
+      try {
+        const response = await fetch(
+          `${EXPO_PUBLIC_SUPABASE_URL}/rest/v1/shops?shop_id=eq.${businessId}&select=favorites_count`,
+          {
+            method: 'GET',
+            headers: this.getDefaultHeaders()
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.length > 0 && data[0].favorites_count !== undefined) {
+            return data[0].favorites_count || 0;
+          }
+        }
+      } catch (innerError) {
+        console.log('Could not get favorites_count from shops table, falling back to count method');
+      }
+
+      // If the above fails, use count method on favorites table
+      const countResponse = await fetch(
+        `${EXPO_PUBLIC_SUPABASE_URL}/rest/v1/favorites?shop_id=eq.${businessId}&select=shop_id`,
+        {
+          method: 'GET',
+          headers: this.getDefaultHeaders()
+        }
+      );
+
+      if (!countResponse.ok) {
+        throw new Error(`Failed to count favorites: ${countResponse.statusText}`);
+      }
+
+      const favoritesData = await countResponse.json();
+      return favoritesData.length;
+    } catch (error) {
+      console.error('Error getting business favorites count:', error);
+      return 0;
+    }
+  },
+
+  // Increment the favorites count for a business
+  async incrementBusinessFavoritesCount(businessId: number) {
+    try {
+      // Get current count first to avoid race conditions
+      const currentCount = await this.getBusinessFavoritesCount(businessId);
+      
+      // Try to update favorites_count in shops table
+      const response = await fetch(
+        `${EXPO_PUBLIC_SUPABASE_URL}/rest/v1/shops?shop_id=eq.${businessId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            ...this.getDefaultHeaders(),
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            favorites_count: currentCount + 1
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to increment favorites count: ${response.statusText}`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error incrementing favorites count:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  },
+
+  // Decrement the favorites count for a business
+  async decrementBusinessFavoritesCount(businessId: number) {
+    try {
+      // Get current count first to avoid race conditions
+      const currentCount = await this.getBusinessFavoritesCount(businessId);
+      const newCount = Math.max(0, currentCount - 1); // Don't go below 0
+      
+      const response = await fetch(
+        `${EXPO_PUBLIC_SUPABASE_URL}/rest/v1/shops?shop_id=eq.${businessId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            ...this.getDefaultHeaders(),
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            favorites_count: newCount
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to decrement favorites count: ${response.statusText}`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error decrementing favorites count:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  },
 };

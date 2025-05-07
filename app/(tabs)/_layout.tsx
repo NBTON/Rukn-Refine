@@ -100,6 +100,21 @@ const TabsLayout = () => {
           ),
         }}
       />
+      <Tabs.Screen
+        name="recommendation"
+        options={{
+          title: "Recommendation",
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              icon={icons.idea}
+              color={color}
+              name={"Best Locations"}
+              focused={focused}
+            />
+          ),
+        }}
+      />
       {/* <Tabs.Screen
         name="chat"
         options={{
