@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useCallback,
   useRef,
-
+  useEffect
 } from "react";
 import {
   View,
@@ -17,21 +17,296 @@ import {
   FlatList,
   ScrollView,
   Image,
+  Text,
+  ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import SearchBar from "../../components/SearchBar";
 import ImageSlider from "../../components/ImageSlider";
 import MarketCard from "../../components/MarketCard";
 import FixedHeaderOverlay from "../../components/FixedHeaderOverlay";
 import FilterHeader from "../../components/FilterHeader";
-import { MARKETPLACES, MarketplaceItem, images } from "../../components/types";
+import { MarketplaceItem, images } from "../../components/types";
+import { supabase } from "../../src/utils/supabase";
+import { supabaseApi } from "../../lib/supabase";
+import { setupSupabase, getMockMarketplaces } from "../../lib/supabaseSetup";
 
 const { width, height } = Dimensions.get("window");
 const HEADER_HEIGHT = 300; // Height reserved for the image slider
-const CARD_TOP_OFFSET = HEADER_HEIGHT  ; // Card shows a little of the image slider
+const CARD_TOP_OFFSET = HEADER_HEIGHT; // Card shows a little of the image slider
 const FIXED_HEADER_THRESHOLD = 150; // When to show the fixed header overlay
 
 const MarketScreen: FC = () => {
   const [showFixedHeader, setShowFixedHeader] = useState(false);
+  const [marketplaces, setMarketplaces] = useState<MarketplaceItem[]>([]);
+  const [filteredMarketplaces, setFilteredMarketplaces] = useState<MarketplaceItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreData, setHasMoreData] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Function to fetch businesses from Supabase with pagination (20 per page)
+  const fetchMarketplaces = async (page = 1) => {
+    try {
+      if (page === 1) {
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+
+      console.log(`Attempting to fetch page ${page} of Businesses data from Supabase, 20 per page...`);
+
+      try {
+        // Test connection first
+        console.log('Testing Supabase connection before fetching data...');
+        const isConnected = await supabaseApi.testConnection();
+        console.log('Connection test result:', isConnected);
+        
+        if (!isConnected) {
+          throw new Error('Could not connect to Supabase');
+        }
+      } catch (connError) {
+        console.error('Supabase connection test failed:', connError);
+        throw new Error('Supabase connection error');
+      }
+      
+      // Call the Supabase API to fetch business data with proper pagination
+      // This will fetch from the Businesses table with the exact column names:
+      // "name", "rating", "user_ratings_total", "business_status", "latitude", "longitude", "business_type", "popularity_score", "zone_id", "business_id"
+      console.log(`Fetching page ${page} of business data with 20 items per page`);
+      const data = await supabaseApi.fetchMarketplaces(page, 20);
+      console.log('Business data from Supabase:', data.length ? `Received ${data.length} items` : 'No data received');
+      
+      // If no data returned and this is first page, use mock data
+      if (data.length === 0 && page === 1) {
+        console.log('Using fallback mock data since no data was returned from Supabase');
+        // Create mock business data format with all required fields
+        const mockData = [
+          {
+            id: "1",
+            title: "4.2", // Rating as title
+            price: "35,000 ريال / سنة",
+            size: "تقييمات المستخدمين: 120",
+            location: "منطقة 2",
+            image: "../assets/images/dummy3.png" as keyof typeof images,
+            businessName: "صالون مقص بربر",
+            businessType: "barber",
+            businessStatus: "OPERATIONAL",
+            user_ratings_total: "120",
+            zone_id: "2",
+            popularity_score: "350"
+          },
+          {
+            id: "2",
+            title: "3.8", // Rating as title
+            price: "42,000 ريال / سنة",
+            size: "تقييمات المستخدمين: 85",
+            location: "منطقة 3",
+            image: "../assets/images/dummy2.png" as keyof typeof images,
+            businessName: "Nasir Hallaq",
+            businessType: "barber",
+            businessStatus: "OPERATIONAL",
+            user_ratings_total: "85",
+            zone_id: "3",
+            popularity_score: "280"
+          },
+          {
+            id: "3",
+            title: "4.5", // Rating as title
+            price: "28,000 ريال / سنة",
+            size: "تقييمات المستخدمين: 230",
+            location: "منطقة 1",
+            image: "../assets/images/dummy1.png" as keyof typeof images,
+            businessName: "Fawaz neighborhood market",
+            businessType: "store",
+            businessStatus: "OPERATIONAL",
+            user_ratings_total: "230",
+            zone_id: "1",
+            popularity_score: "420"
+          },
+          {
+            id: "4",
+            title: "3.9", // Rating as title
+            price: "33,000 ريال / سنة",
+            size: "تقييمات المستخدمين: 110",
+            location: "منطقة 4",
+            image: "../assets/images/dummy4.png" as keyof typeof images,
+            businessName: "Golden Scissors",
+            businessType: "barber",
+            businessStatus: "OPERATIONAL",
+            user_ratings_total: "110",
+            zone_id: "4",
+            popularity_score: "300"
+          },
+        ];
+        setMarketplaces(mockData);
+        // No more data to load after mock data
+        setHasMoreData(false);
+        setCurrentPage(1);
+        return;
+      }
+
+      // Log success message
+      console.log(`Successfully fetched ${data.length} business items from Supabase`);
+
+      // If this is page 1, replace the data completely, otherwise append
+      if (page === 1) {
+        setMarketplaces(data);
+        setFilteredMarketplaces(data); // Initialize filtered list with all data
+      } else {
+        setMarketplaces(prev => {
+          const newData = [...prev, ...data];
+          // Apply current search filter to the new combined data
+          if (searchQuery) {
+            handleSearch(searchQuery, newData);
+          } else {
+            setFilteredMarketplaces(newData);
+          }
+          return newData;
+        });
+      }
+      
+      // Set hasMoreData flag based on whether we received exactly 20 items (pageSize)
+      // This means there might be more data to load
+      setHasMoreData(data.length === 20);
+      setCurrentPage(page);
+
+      console.log(`Page ${page} loaded with ${data.length} businesses`);
+      console.log(`Has more data: ${data.length === 20}`);
+      console.log(`Current page set to: ${page}`);
+    } catch (error) {
+      console.error('Error fetching businesses:', error);
+      
+      // If there's an error on the first page, use mock data
+      if (page === 1) {
+        console.log('Using fallback mock data due to error');
+        console.log('Error details:', error instanceof Error ? error.message : 'Unknown error');
+        
+        const mockData = [
+          {
+            id: "1",
+            title: "4.2", // Rating as title
+            price: "35,000 ريال / سنة",
+            size: "تقييمات المستخدمين: 120",
+            location: "منطقة 2",
+            image: "../assets/images/dummy3.png" as keyof typeof images,
+            businessName: "صالون مقص بربر",
+            businessType: "barber"
+          },
+          {
+            id: "2",
+            title: "3.8", // Rating as title
+            price: "42,000 ريال / سنة",
+            size: "تقييمات المستخدمين: 85",
+            location: "منطقة 3",
+            image: "../assets/images/dummy2.png" as keyof typeof images,
+            businessName: "Nasir Hallaq",
+            businessType: "barber"
+          },
+        ];
+        setMarketplaces(mockData);
+        setHasMoreData(false);
+      }
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+
+  // Handle search functionality
+  const handleSearch = useCallback((query: string, data?: MarketplaceItem[]) => {
+    const dataToFilter = data || marketplaces;
+    const trimmedQuery = query.trim().toLowerCase();
+    setSearchQuery(trimmedQuery);
+    
+    if (!trimmedQuery) {
+      // If search is cleared, show all results
+      setFilteredMarketplaces(dataToFilter);
+      return;
+    }
+    
+    // Filter businesses by name or business type
+    const results = dataToFilter.filter(item => {
+      const nameMatch = item.businessName?.toLowerCase().includes(trimmedQuery);
+      const typeMatch = item.businessType?.toLowerCase().includes(trimmedQuery);
+      return nameMatch || typeMatch;
+    });
+    
+    setFilteredMarketplaces(results);
+  }, [marketplaces]);
+
+  // Handle clearing the search
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+    setFilteredMarketplaces(marketplaces);
+  }, [marketplaces]);
+  
+  // Load initial data when component mounts - direct fetch from Supabase
+  useEffect(() => {
+    const initializeData = async () => {
+      setIsLoading(true);
+      
+      try {
+        console.log('Initializing and fetching data from Businesses table in Supabase...');
+        // Clear any existing data, then fetch from Supabase
+        setMarketplaces([]);
+        setFilteredMarketplaces([]);
+        await fetchMarketplaces(1);
+      } catch (error) {
+        console.error('Error in direct fetch from Supabase:', error);
+        console.log('Error details:', error instanceof Error ? error.message : 'Unknown error');
+        
+        // If direct fetch fails, use mock data
+        console.log('Using mock data due to fetch failure');
+        const mockData = [
+          {
+            id: "1",
+            title: "4.2", // Rating as title
+            price: "35,000 ريال / سنة",
+            size: "تقييمات المستخدمين: 120",
+            location: "منطقة 2",
+            image: "../assets/images/dummy3.png" as keyof typeof images,
+            businessName: "صالون مقص بربر",
+            businessType: "barber"
+          },
+          {
+            id: "2",
+            title: "3.8", // Rating as title
+            price: "42,000 ريال / سنة",
+            size: "تقييمات المستخدمين: 85",
+            location: "منطقة 3",
+            image: "../assets/images/dummy2.png" as keyof typeof images,
+            businessName: "Nasir Hallaq",
+            businessType: "barber"
+          },
+          {
+            id: "3",
+            title: "4.5", // Rating as title
+            price: "28,000 ريال / سنة",
+            size: "تقييمات المستخدمين: 230",
+            location: "منطقة 1",
+            image: "../assets/images/dummy1.png" as keyof typeof images,
+            businessName: "Fawaz neighborhood market",
+            businessType: "store"
+          },
+        ];
+        setMarketplaces(mockData);
+        setFilteredMarketplaces(mockData);
+        setHasMoreData(false);
+        setIsLoading(false);
+      }
+    };
+    
+    initializeData();
+  }, []);
+
+  // Function to load more data when user scrolls to the end
+  const loadMoreData = () => {
+    if (!isLoadingMore && hasMoreData) {
+      fetchMarketplaces(currentPage + 1);
+    }
+  };
 
   // Handle scrolling of the card.
   const handleScroll = useCallback(
@@ -42,18 +317,39 @@ const MarketScreen: FC = () => {
       } else if (yOffset -20 <= FIXED_HEADER_THRESHOLD && showFixedHeader) {
         setShowFixedHeader(false);
       }
+      
+      // Check if we're near the end of the content to load more data
+      const position = evt.nativeEvent.contentOffset.y;
+      const contentHeight = evt.nativeEvent.contentSize.height;
+      const scrollViewHeight = evt.nativeEvent.layoutMeasurement.height;
+      
+      if (position + scrollViewHeight >= contentHeight - 50) {
+        loadMoreData();
+      }
     },
-    [showFixedHeader]
+    [showFixedHeader, isLoadingMore, hasMoreData, currentPage]
   );
+
+  // Render function for the footer (loading indicator)
+  const renderFooter = () => {
+    if (!isLoadingMore) return null;
+    return (
+      <View style={styles.loadingFooter}>
+        <ActivityIndicator size="small" color="#F5A623" />
+        <Text style={styles.loadingText}>جاري تحميل المزيد...</Text>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} >
-      
-      
-
-      {/* Fixed Search Bar */}
+      {/* Fixed Search Bar - position adjusted for top bar */}
       <View style={styles.searchBarWrapper}>
-        <SearchBar />
+        <SearchBar 
+          onSearch={handleSearch}
+          value={searchQuery}
+          onClear={handleClearSearch}
+        />
       </View>
 
       {/* Fixed Header Overlay (appears below search bar) */}
@@ -74,17 +370,34 @@ const MarketScreen: FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Fixed Background Image Slider */}
-      <View style={styles.imageSliderContainer}>
-        <Image source={images["../assets/images/dummy1.png"]} style={styles.backgroundImage}/>
-      </View>
+        <View style={styles.imageSliderContainer}>
+          <Image source={images["../assets/images/dummy1.png"]} style={styles.backgroundImage}/>
+        </View>
         <View style={styles.card}>
           <FilterHeader />
-          <FlatList
-            data={MARKETPLACES}
-            renderItem={({ item }) => <MarketCard item={item} />}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false} // The outer ScrollView manages scrolling
-          />
+          
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#F5A623" />
+              <Text style={styles.loadingText}>جاري تحميل المحلات...</Text>
+            </View>
+          ) : filteredMarketplaces.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              {searchQuery ? (
+                <Text style={styles.emptyText}>لم يتم العثور على نتائج للبحث</Text>
+              ) : (
+                <Text style={styles.emptyText}>لا توجد محلات متاحة حالياً</Text>
+              )}
+            </View>
+          ) : (
+            <FlatList
+              data={filteredMarketplaces}
+              renderItem={({ item }) => <MarketCard item={item} />}
+              keyExtractor={(item) => item.id}
+              ListFooterComponent={renderFooter}
+              scrollEnabled={false} // The outer ScrollView manages scrolling
+            />
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -123,12 +436,8 @@ const styles = StyleSheet.create({
   },
   // The ScrollView covers the full screen.
   scrollView: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 10,
+    flex: 1,
+    position: "relative",
   },
   // Content starts at an offset to reveal the image slider underneath initially.
   scrollViewContent: {
@@ -142,6 +451,36 @@ const styles = StyleSheet.create({
     padding: 5,
     paddingBottom: 20,
     elevation: 10,
+  },
+  // Loading and empty state styles
+  loadingContainer: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 200,
+  },
+  loadingFooter: {
+    padding: 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'right',
+  },
+  emptyContainer: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 150,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 });
 

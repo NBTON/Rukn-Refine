@@ -1,6 +1,6 @@
 import { View, Image, Text } from "react-native";
 import React, { useState } from "react";
-import { Tabs } from "expo-router";
+import { Tabs, Stack } from "expo-router";
 import { icons } from "../../constants";
 
 interface TabIconProps {
@@ -52,6 +52,7 @@ const TabsLayout = () => {
           borderBottomColor: "#232533",
           height: 84,
         },
+        headerShown: false,
       }}
     >
       <Tabs.Screen
@@ -84,7 +85,7 @@ const TabsLayout = () => {
           ),
         }}
       />
-      {/* <Tabs.Screen
+      <Tabs.Screen
         name="map"
         options={{
           title: "Map",
@@ -98,7 +99,7 @@ const TabsLayout = () => {
             />
           ),
         }}
-      /> */}
+      />
       {/* <Tabs.Screen
         name="chat"
         options={{

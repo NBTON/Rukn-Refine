@@ -1,11 +1,20 @@
 // types.ts
 export interface MarketplaceItem {
-  id: string;
-  title: string;
-  price: string;
-  size: string;
-  location: string;
-  image: keyof typeof images; // must match one of the keys in our images mapping
+  id: string;                           // business_id from database
+  title: string;                        // rating from database (displayed as star rating)
+  price: string;                        // randomly generated price (25,000 - 100,000 range)
+  size: string | null;                  // user_ratings_total from database
+  location: string;                     // zone information
+  image: string | keyof typeof images;  // can be a remote URL or a key in the images mapping
+  businessName: string;                 // name from database
+  businessType: string;                 // business_type from database (e.g., barber)
+  businessStatus?: string;              // business_status from database
+  user_ratings_total?: string;          // total user ratings count
+  zone_id?: string;                     // reference to Zones table
+  popularity_score?: string;            // popularity metric from database
+  latitude?: string;                    // latitude coordinates
+  longitude?: string;                   // longitude coordinates
+  originalData?: any;                   // original data from Supabase
 }
 
 // Mapping for dynamic image imports.
@@ -19,58 +28,100 @@ export const images = {
 export const MARKETPLACES: MarketplaceItem[] = [
   {
     id: "1",
-    title: "مناسب لفكرتك بنسبة 96%",
+    title: "4.2",                    // Rating (displayed as star rating)
     price: "30,000 ريال / سنة",
-    size: "400 متر مربع",
-    location: "الخبر, السعودية",
+    size: "تقييمات المستخدمين: 120",
+    location: "منطقة 1",
     image: "../assets/images/dummy3.png",
+    businessName: "صالون مقص بربر",
+    businessType: "barber",
+    businessStatus: "OPERATIONAL",
+    user_ratings_total: "120",
+    zone_id: "1",
+    popularity_score: "350"
   },
   {
     id: "2",
-    title: "مناسب لفكرتك بنسبة 97%",
-    price: "30,000 ريال / سنة",
-    size: "420 متر مربع",
-    location: "الدمام, السعودية",
+    title: "3.9",                    // Rating (displayed as star rating)
+    price: "32,000 ريال / سنة",
+    size: "تقييمات المستخدمين: 85",
+    location: "منطقة 2",
     image: "../assets/images/dummy2.png",
+    businessName: "Nasir Hallaq",
+    businessType: "barber",
+    businessStatus: "OPERATIONAL",
+    user_ratings_total: "85",
+    zone_id: "2",
+    popularity_score: "280"
   },
   {
     id: "3",
-    title: "مناسب لفكرتك بنسبة 90%",
-    price: "25,000 ريال / سنة",
-    size: "380 متر مربع",
-    location: "الرياض, السعودية",
+    title: "4.5",                    // Rating (displayed as star rating)
+    price: "28,000 ريال / سنة",
+    size: "تقييمات المستخدمين: 230",
+    location: "منطقة 3",
     image: "../assets/images/dummy1.png",
+    businessName: "Fawaz neighborhood market",
+    businessType: "store",
+    businessStatus: "OPERATIONAL",
+    user_ratings_total: "230",
+    zone_id: "3",
+    popularity_score: "420"
   },
   {
     id: "4",
-    title: "مناسب لفكرتك بنسبة 90%",
-    price: "25,000 ريال / سنة",
-    size: "380 متر مربع",
-    location: "الرياض, السعودية",
+    title: "3.8",                    // Rating (displayed as star rating)
+    price: "35,000 ريال / سنة",
+    size: "تقييمات المستخدمين: 110",
+    location: "منطقة 4",
     image: "../assets/images/dummy4.png",
+    businessName: "Golden Scissors",
+    businessType: "barber",
+    businessStatus: "OPERATIONAL",
+    user_ratings_total: "110",
+    zone_id: "4",
+    popularity_score: "300"
   },
   {
     id: "5",
-    title: "مناسب لفكرتك بنسبة 90%",
-    price: "25,000 ريال / سنة",
-    size: "380 متر مربع",
-    location: "الرياض, السعودية",
+    title: "4.1",                    // Rating (displayed as star rating)
+    price: "42,000 ريال / سنة",
+    size: "تقييمات المستخدمين: 95",
+    location: "منطقة 2",
     image: "../assets/images/dummy3.png",
+    businessName: "قهوة الرواق",
+    businessType: "cafe",
+    businessStatus: "OPERATIONAL",
+    user_ratings_total: "95",
+    zone_id: "2",
+    popularity_score: "290"
   },
   {
     id: "6",
-    title: "مناسب لفكرتك بنسبة 90%",
-    price: "25,000 ريال / سنة",
-    size: "380 متر مربع",
-    location: "الرياض, السعودية",
+    title: "4.3",                    // Rating (displayed as star rating)
+    price: "38,000 ريال / سنة",
+    size: "تقييمات المستخدمين: 150",
+    location: "منطقة 1",
     image: "../assets/images/dummy1.png",
+    businessName: "مطعم الشام",
+    businessType: "restaurant",
+    businessStatus: "OPERATIONAL",
+    user_ratings_total: "150",
+    zone_id: "1",
+    popularity_score: "380"
   },
   {
     id: "7",
-    title: "مناسب لفكرتك بنسبة 90%",
-    price: "25,000 ريال / سنة",
-    size: "380 متر مربع",
-    location: "الرياض, السعودية",
+    title: "3.7",                    // Rating (displayed as star rating)
+    price: "29,000 ريال / سنة",
+    size: "تقييمات المستخدمين: 75",
+    location: "منطقة 3",
     image: "../assets/images/dummy2.png",
+    businessName: "البقالة العائلية",
+    businessType: "store",
+    businessStatus: "OPERATIONAL",
+    user_ratings_total: "75",
+    zone_id: "3",
+    popularity_score: "250"
   },
 ];

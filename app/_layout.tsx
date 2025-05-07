@@ -3,6 +3,7 @@ import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
+  NavigationContainer
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -13,6 +14,9 @@ import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useColorScheme } from "@/components/useColorScheme";
+import ReanimatedConfig from "@/components/ReanimatedConfig";
+import { AuthProvider } from "@/src/context/AuthContext";
+import { FavoritesProvider } from "@/src/context/FavoritesContext";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -55,20 +59,22 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-    
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ gestureEnabled: true }}>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="(auth)"
-          options={{ presentation: "modal", headerShown: false }}
-        />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="chatScreen" options={{ headerShown: false }} />
-      </Stack>
-    </ThemeProvider>
-    
-  </GestureHandlerRootView>
+    <AuthProvider>
+      <FavoritesProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="(auth)"
+                options={{ presentation: "modal", headerShown: false }}
+              />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="chatScreen" options={{ headerShown: false }} />
+            </Stack>
+          </ThemeProvider>
+        </GestureHandlerRootView>
+      </FavoritesProvider>
+    </AuthProvider>
   );
 }

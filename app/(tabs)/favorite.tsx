@@ -1,76 +1,114 @@
 import React, {
   FC,
   useState,
-  useMemo,
   useCallback,
-  useRef,
-
+  useMemo,
 } from "react";
 import {
   View,
   SafeAreaView,
   StyleSheet,
   Dimensions,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
   FlatList,
   ScrollView,
   Image,
+  Text,
 } from "react-native";
 import SearchBar from "../../components/SearchBar";
-import ImageSlider from "../../components/ImageSlider";
 import MarketCard from "../../components/MarketCard";
-
 import IdeaHeader from "../../components/ideaHeader";
-import { MARKETPLACES, MarketplaceItem, images } from "../../components/types";
+import { MarketplaceItem, images } from "../../components/types";
+import { useFavorites } from "../../src/context/FavoritesContext";
 
 const { width, height } = Dimensions.get("window");
 const HEADER_HEIGHT = 300; // Height reserved for the image slider
 const CARD_TOP_OFFSET = HEADER_HEIGHT; // Card shows a little of the image slider
 
-
 const favorite: FC = () => {
+  // Get favorites from context
+  const { favorites } = useFavorites();
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Filter favorites based on search query
+  const filteredFavorites = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return favorites;
+    }
+    
+    const query = searchQuery.trim().toLowerCase();
+    return favorites.filter(item => {
+      const nameMatch = item.businessName?.toLowerCase().includes(query);
+      const typeMatch = item.businessType?.toLowerCase().includes(query);
+      return nameMatch || typeMatch;
+    });
+  }, [favorites, searchQuery]);
+  
+  // Handle search functionality
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
+  
+  // Handle clearing the search
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+  }, []);
 
   return (
-    <SafeAreaView style={styles.container} >
-
-
-
+    <SafeAreaView style={styles.container}>
       {/* Fixed Search Bar */}
       <View style={styles.searchBarWrapper}>
-        <SearchBar />
+        <SearchBar 
+          onSearch={handleSearch}
+          value={searchQuery}
+          onClear={handleClearSearch}
+        />
       </View>
-
-
-
-      {/* Card content in a ScrollView.
-            The content container starts at CARD_TOP_OFFSET so that it appears as a card
-            initially below the image slider. As the user scrolls, the card goes above the slider. */}
 
       {/* Fixed Background Image Slider */}
       <View style={styles.imageSliderContainer}>
         <Image source={images["../assets/images/dummy1.png"]} style={styles.backgroundImage} />
       </View>
+      
       <View style={styles.fixedHeaderOverlayWrapper}>
-          <IdeaHeader />
-        </View>
+        <IdeaHeader />
+      </View>
+      
       <ScrollView
         style={styles.card}
         contentContainerStyle={styles.scrollViewContent}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
       >
-
-        
-        <FlatList
-          data={MARKETPLACES}
-          renderItem={({ item }) => <MarketCard item={item} />}
-          keyExtractor={(item) => item.id}
-          scrollEnabled={false} // The outer ScrollView manages scrolling
-        />
+        {favorites.length === 0 ? (
+          // Display a message when no favorites are available
+          <View style={styles.emptyFavoritesContainer}>
+            <Text style={styles.emptyFavoritesText}>
+              لا توجد محلات مفضلة حاليًا
+            </Text>
+            <Text style={styles.emptyFavoritesSubText}>
+              اضغط على أيقونة القلب في أي محل لإضافته إلى المفضلة
+            </Text>
+          </View>
+        ) : filteredFavorites.length === 0 ? (
+          // Display a message when no search results
+          <View style={styles.emptyFavoritesContainer}>
+            <Text style={styles.emptyFavoritesText}>
+              لم يتم العثور على نتائج للبحث
+            </Text>
+            <Text style={styles.emptyFavoritesSubText}>
+              جرب بحثًا آخر أو امسح البحث
+            </Text>
+          </View>
+        ) : (
+          // Display the filtered list of favorites
+          <FlatList
+            data={filteredFavorites}
+            renderItem={({ item }) => <MarketCard item={item} />}
+            keyExtractor={(item) => item.id}
+            scrollEnabled={false} // The outer ScrollView manages scrolling
+          />
+        )}
       </ScrollView>
-
-
     </SafeAreaView>
   );
 };
@@ -79,7 +117,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    marginBottom:50,
   },
   imageSliderContainer: {
     position: "absolute",
@@ -106,14 +143,10 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 15,
   },
-  // The ScrollView covers the full screen.
-
-  // Content starts at an offset to reveal the image slider underneath initially.
   scrollViewContent: {
     paddingTop:0,
     minHeight: height - CARD_TOP_OFFSET,
     paddingBottom:40,
-
   },
   card: {
     top: 100,
@@ -122,7 +155,26 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 5,
     elevation: 10,
-    paddingVertical:40,
+    paddingVertical: 40,
+  },
+  emptyFavoritesContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    marginTop: 40,
+  },
+  emptyFavoritesText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  emptyFavoritesSubText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   },
 });
 

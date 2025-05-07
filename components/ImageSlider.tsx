@@ -12,6 +12,9 @@ import {
 } from "react-native";
 import { MARKETPLACES, MarketplaceItem, images } from "./types";
 
+// Define image keys type to avoid TypeScript errors
+type ImageKeyType = keyof typeof images;
+
 const { width } = Dimensions.get("window");
 
 interface ImageSliderProps {
@@ -19,6 +22,7 @@ interface ImageSliderProps {
   currentIndex: number;
   onSlideChange: (evt: NativeSyntheticEvent<NativeScrollEvent>) => void;
   sliderRef: React.RefObject<ScrollView>;
+  showTitleOverlay?: boolean;
 }
 
 const ImageSlider: FC<ImageSliderProps> = ({
@@ -26,6 +30,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
   currentIndex,
   onSlideChange,
   sliderRef,
+  showTitleOverlay = false,
 }) => {
   // Keep track of the current slide index
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -71,13 +76,15 @@ const ImageSlider: FC<ImageSliderProps> = ({
         {data.map((item) => (
           <View key={item.id} style={{ width }}>
             <Image
-              source={images[item.image]}
+              source={images[item.image as ImageKeyType]}
               style={styles.image}
               resizeMode="stretch"
             />
-            <View style={styles.overlay}>
-              <Text style={styles.title}>{item.title}</Text>
-            </View>
+            {showTitleOverlay && (
+              <View style={styles.overlay}>
+                <Text style={styles.title}>{item.title}</Text>
+              </View>
+            )}
           </View>
         ))}
       </ScrollView>
