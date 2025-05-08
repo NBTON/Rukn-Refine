@@ -2,88 +2,120 @@
 
 ## Overview
 
-This document explains the organization of the RuknApp project files and folders. The structure follows modern React Native best practices to make development, maintenance, and collaboration easier.
+This document explains the organization of the RuknApp project files and folders. The structure reflects the current state of the project with recommendations for future organization to align with React Native best practices.
 
-## Main Project Directories
+## Current Project Structure
 
 ```
-src/                    # Main source code directory
+RuknApp/
+├── .env                # Environment variables
+├── .expo/              # Expo configuration
+├── .git/               # Git repository
+├── .gitignore          # Git ignore rules
+├── app/                # Expo Router app directory
+│   ├── (auth)/         # Authentication routes
+│   ├── (tabs)/         # Tab navigator routes
+│   ├── +html.tsx       # HTML wrapper for web
+│   ├── +not-found.tsx  # 404 page
+│   ├── _layout.tsx     # Root layout component
+│   ├── chatScreen.tsx  # Chat screen
+│   ├── index.tsx       # Home/landing page
+│   └── placeDetails.tsx # Place details screen
+├── assets/             # Static assets
+│   └── fonts/          # Custom fonts
+├── backend/            # Backend server code
+│   ├── controllers/    # Request handlers
+│   ├── middleware/     # Express middleware
+│   ├── models/         # Data models
+│   ├── routes/         # API route definitions
+│   ├── utils/          # Backend utilities
+│   ├── server.js       # Server entry point
+│   └── ...             # Configuration files
+├── components/         # UI components (DUPLICATED)
+│   ├── EditScreenInfo.tsx
+│   ├── ExternalLink.tsx
+│   ├── FilterHeader.tsx
+│   ├── FixedHeaderOverlay.tsx
+│   ├── ImageSlider.tsx
+│   ├── MarketCard.tsx
+│   ├── SearchBar.tsx
+│   ├── StyledText.tsx
+│   ├── Themed.tsx
+│   ├── ideaHeader.tsx
+│   ├── types.tsx
+│   ├── useColorScheme.ts
+│   └── ...
+├── constants/          # Application constants
+│   ├── Colors.ts       # Color definitions
+│   ├── icons.js        # Icon definitions
+│   └── index.js        # Exports
+├── lib/                # Libraries and utilities
+│   ├── supabase.ts     # Supabase client
+│   └── supabaseSetup.ts # Supabase configuration
+├── src/                # Source code directory
+│   ├── context/        # React context providers
+│   │   ├── AuthContext.tsx
+│   │   └── FavoritesContext.tsx
+│   ├── hooks/          # Custom React hooks
+│   ├── navigation/     # Navigation components
+│   ├── screens/        # Application screens (some duplicated with app/)
+│   │   ├── chatScreen.tsx
+│   │   ├── index.tsx
+│   │   └── placeDetails.tsx
+│   ├── utils/          # Utility functions
+│   └── README.md       # Source code documentation
+├── types/              # TypeScript type definitions
+├── app.json            # Expo app configuration
+├── babel.config.js     # Babel configuration
+├── package.json        # NPM package configuration
+└── tsconfig.json       # TypeScript configuration
+```
+
+## Identified Issues
+
+1. **Component Duplication**: Components are currently in the root-level `/components` directory while the project structure mentions them in `/src/components/ui` and `/src/components/layout`.
+
+2. **Screen Duplication**: Some screens appear to be duplicated in both `/app` (Expo Router) and `/src/screens` directories.
+
+3. **Inconsistent Organization**: The codebase is split between root-level directories and the `/src` directory, which can lead to confusion.
+
+## Recommended Structure
+
+To align with modern React Native best practices and resolve current issues, we recommend the following reorganization:
+
+```
+RuknApp/
+├── app/                # Expo Router (entry points only)
 ├── assets/             # Static assets (images, icons, fonts)
-├── components/         # Reusable UI components
-│   ├── ui/             # Basic UI elements (buttons, cards, inputs)
-│   └── layout/         # Layout components (headers, footers, containers)
-├── constants/          # Application constants and configuration
-├── hooks/              # Custom React hooks
-├── navigation/         # Navigation configuration and components
-├── screens/            # Application screens/pages
-├── services/           # API services, external integrations
-└── utils/              # Utility functions and helpers
-
-backend/                # Backend server code
-├── controllers/        # Request handlers and business logic
-├── middleware/         # Express middleware
-├── models/             # Data models and schemas
-├── routes/             # API route definitions
-└── utils/              # Backend utility functions
+├── backend/            # Backend server code
+├── src/                # Main source code directory
+│   ├── components/     # Reusable UI components
+│   │   ├── ui/         # Basic UI elements
+│   │   └── layout/     # Layout components
+│   ├── constants/      # Application constants
+│   ├── context/        # React context providers
+│   ├── hooks/          # Custom React hooks
+│   ├── lib/            # Libraries and utilities
+│   ├── navigation/     # Navigation configuration
+│   ├── screens/        # Application screens
+│   └── utils/          # Utility functions
+├── types/              # TypeScript type definitions
+└── ...                 # Configuration files
 ```
 
-## Detailed Structure Explanation
+## Implementation Plan
 
-### Frontend (src/)
+1. **Consolidate Components**:
+   - Move all components from root `/components` to `/src/components`
+   - Organize into `/ui` and `/layout` subdirectories based on purpose
 
-#### assets/
-Contains all static assets used in the application:
-- `images/`: For all application images
-- `icons/`: For custom icons
-- `fonts/`: For custom fonts
+2. **Resolve Screen Duplication**:
+   - Keep screen implementations in `/src/screens`
+   - Use `/app` directory for routing only, importing components from `/src/screens`
 
-#### components/
-Reusable UI components organized by purpose:
-- `ui/`: Basic building blocks like buttons, inputs, cards
-- `layout/`: Structural components like headers, navigation bars
-
-#### constants/
-Application-wide constants and configuration:
-- Environment-specific settings
-- Theme variables
-- API endpoints
-
-#### hooks/
-Custom React hooks that encapsulate reusable logic.
-
-#### navigation/
-All navigation-related code using Expo Router:
-- Navigation configurations
-- Route definitions
-- Navigation utilities
-
-#### screens/
-Each screen or page in the application, organized by feature or flow.
-
-#### services/
-Services for data fetching and external API integrations:
-- API client configurations
-- Service functions to interact with the backend
-
-#### utils/
-Utility functions and helper methods used throughout the app.
-
-### Backend (backend/)
-
-#### controllers/
-Handlers for API requests containing business logic.
-
-#### middleware/
-Express middleware for request processing (authentication, validation, etc.).
-
-#### models/
-Data models and database schema definitions.
-
-#### routes/
-API route definitions and endpoint handlers.
-
-#### utils/
-Utility functions specific to the backend.
+3. **Consolidate Constants and Utilities**:
+   - Move root `/constants` to `/src/constants`
+   - Move `/lib` to `/src/lib`
 
 ## Guidelines for Development
 
@@ -94,12 +126,6 @@ Utility functions specific to the backend.
    - UI components in `src/components/ui/`
    - Layout components in `src/components/layout/`
 3. **New API Services**: Add in `src/services/`
-
-### Modifying Existing Features
-
-1. Find the relevant directory based on what you're modifying
-2. Make changes following the established patterns
-3. Update tests if applicable
 
 ### Backend Development
 
@@ -117,4 +143,4 @@ Utility functions specific to the backend.
 
 ---
 
-This structure is designed to make navigation and understanding of the codebase straightforward. If you have any questions or suggestions for improvements, please discuss with the team.
+This structure is designed to make navigation and understanding of the codebase straightforward. If you have questions or suggestions for improvements, please discuss with the team.
