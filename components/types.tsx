@@ -21,6 +21,10 @@ export interface MarketplaceItem {
   business_type?: string;               // alternative business type name
   favorites_count?: number;             // count of how many users have favorited this business
   originalData?: any;                   // original data from Supabase
+  
+  // Zone recommendation algorithm properties
+  recommendationScore?: number;         // score from the zone recommendation algorithm
+  isInRecommendedZone?: boolean;        // whether this listing is in a recommended zone
 }
 
 // Mapping for dynamic image imports.

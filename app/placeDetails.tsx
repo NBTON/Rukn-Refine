@@ -1,20 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Dimensions,
-  ActivityIndicator,
-  StatusBar,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-} from 'react-native';
+import React, { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, Dimensions, NativeSyntheticEvent, NativeScrollEvent, StatusBar, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { MarketplaceItem, images } from '../components/types';
 import { useFavorites } from '../src/context/FavoritesContext';
+
+const { width } = Dimensions.get('window');
 
 // Direct access to Supabase constants to avoid TypeScript errors
 const SUPABASE_URL = 'https://vnvbjphwulwpdzfieyyo.supabase.co';
@@ -25,7 +15,33 @@ type ImageKeyType = keyof typeof images;
 import ImageSlider from '../components/ImageSlider';
 import { icons } from '@/constants';
 
-const { width } = Dimensions.get('window');
+// Import Saudi Riyal Symbol image
+const saudiRiyalSymbol = require('../assets/images/Saudi_Riyal_Symbol.svg.png');
+
+// Create an optimized image component for the detail slider
+const OptimizedDetailImage = memo(({ uri, index }: { uri: string; index: number }) => {
+  return (
+    <Image
+      key={`detail-image-${index}`}
+      source={{ uri }}
+      style={{ width, height: '100%' }}
+      resizeMode="cover"
+      onLoad={() => console.log(`Image ${index} loaded successfully in details view`)}
+      onError={() => console.log(`Error loading image ${index} in details view`)}
+      defaultSource={require('../assets/images/dummy1.png')}
+    />
+  );
+});
+
+// Create an optimized dot indicator component
+const DetailPaginationDot = memo(({ active }: { active: boolean }) => (
+  <View
+    style={[
+      styles.indicator,
+      active && styles.activeIndicator
+    ]}
+  />
+));
 
 export default function PlaceDetails() {
   const router = useRouter();
@@ -34,18 +50,19 @@ export default function PlaceDetails() {
   const sliderRef = React.useRef<ScrollView>(null);
   const [showActionsInHeader, setShowActionsInHeader] = React.useState(false);
   const [place, setPlace] = useState<MarketplaceItem | null>(null);
-  const [similarPlaces, setSimilarPlaces] = useState<MarketplaceItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [propertyImages, setPropertyImages] = useState<string[]>([]);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   
-  // Fetch the specific business details and similar businesses
+  // Fetch the specific listing details and similar listings
   useEffect(() => {
     const fetchBusinessDetails = async () => {
       try {
         setIsLoading(true);
         
-        console.log('Fetching real-time business details for ID:', id);
+        console.log('Fetching real-time listing details for ID:', id);
         const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/Businesses?business_id=eq.${id}`,
+          `${SUPABASE_URL}/rest/v1/Listings?Listing_ID=eq.${id}`,
           {
             method: 'GET',
             headers: {
@@ -58,49 +75,131 @@ export default function PlaceDetails() {
         );
         
         if (!response.ok) {
-          throw new Error(`Error fetching business: ${response.status}`);
+          throw new Error(`Error fetching listing: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('Fetched business data:', data);
+        console.log('Fetched listing data:', data);
         
         if (data && data.length > 0) {
-          // Format the business data to match MarketplaceItem structure
-          const business = data[0];
-          const businessType = business.business_type || 'store';
+          // Format the listing data to match MarketplaceItem structure
+          const listing = data[0];
           
-          // Get image based on business type
-          const businessTypeImages: {[key: string]: string} = {
-            'barber': '../assets/images/dummy1.png',
-            'restaurant': '../assets/images/dummy2.png',
-            'cafe': '../assets/images/dummy3.png',
-            'store': '../assets/images/dummy4.png'
+          // Enhanced image handling for details page
+          let imageSource: string = 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+          
+          console.log('Property details images field:', listing.Images);
+          
+          try {
+            // Check if Images exists and parse it appropriately
+            if (listing.Images) {
+              // Handle array format
+              if (Array.isArray(listing.Images) && listing.Images.length > 0) {
+                imageSource = listing.Images[0];
+                console.log('Using image from array in details view:', imageSource);
+              }
+              // Handle string format
+              else if (typeof listing.Images === 'string') {
+                const imagesString = listing.Images as string;
+                
+                // Try to parse as JSON if it looks like JSON
+                if (imagesString.startsWith('[')) {
+                  try {
+                    const parsedImages = JSON.parse(imagesString);
+                    if (Array.isArray(parsedImages) && parsedImages.length > 0) {
+                      imageSource = parsedImages[0];
+                      console.log('Using image from parsed JSON in details view:', imageSource);
+                    } else if (imagesString.includes('http')) {
+                      // Use the string directly if it's a URL
+                      imageSource = imagesString;
+                      console.log('Using image string directly in details view:', imageSource);
+                    }
+                  } catch (e) {
+                    // If it fails to parse but looks like a URL, use it directly
+                    if (imagesString.includes('http')) {
+                      imageSource = imagesString;
+                      console.log('Using string as URL in details view after parse fail:', imageSource);
+                    }
+                  }
+                } else if (imagesString.includes('http')) {
+                  // Use the string directly if it's a URL and not JSON
+                  imageSource = imagesString;
+                  console.log('Using string URL directly in details view:', imageSource);
+                }
+              }
+              // Handle object format
+              else if (typeof listing.Images === 'object' && listing.Images !== null) {
+                try {
+                  const imagesObject = listing.Images as Record<string, any>;
+                  // Find any URL in the object
+                  const possibleUrl = Object.values(imagesObject).find(val => 
+                    typeof val === 'string' && val.includes('http'));
+                  
+                  if (possibleUrl && typeof possibleUrl === 'string') {
+                    imageSource = possibleUrl;
+                    console.log('Found URL in object for details view:', imageSource);
+                  }
+                } catch (error) {
+                  console.error('Error extracting image URL from object in details view:', error);
+                }
+              }
+            }
+            
+            // Final check to ensure the URL is valid
+            if (!imageSource || !imageSource.includes('http')) {
+              imageSource = 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+              console.log('Using placeholder in details view - no valid URL found');
+            }
+          } catch (error) {
+            console.error('Error processing image in details view:', error);
+            imageSource = 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+          }
+          
+          // Format price with thousand separators if it's a number
+          const price = typeof listing.Price === 'number' 
+            ? `${new Intl.NumberFormat('ar-SA').format(listing.Price)} ريال` 
+            : listing.Price || '0 ريال';
+          
+          // Extract all available images for this property
+          let allImages: string[] = [];
+          
+          // First check for processedImages from our API processing
+          if (listing.processedImages && Array.isArray(listing.processedImages)) {
+            allImages = listing.processedImages;
+          }
+          // If we don't have processedImages, check if the image is a pipe-separated string
+          else if (typeof imageSource === 'string' && imageSource.includes('|')) {
+            allImages = imageSource.split(/\s*\|\s*/).filter(url => url.includes('http'));
+          }
+          // Single image
+          else if (typeof imageSource === 'string' && imageSource.includes('http')) {
+            allImages = [imageSource];
+          }
+          
+          // If we still don't have any images, use a placeholder
+          if (allImages.length === 0) {
+            allImages = ['https://images.aqar.fm/webp/350x0/props/placeholder.jpg'];
+          }
+          
+          console.log(`Found ${allImages.length} images for property details`);
+          setPropertyImages(allImages);
+          
+          const formattedListing: MarketplaceItem = {
+            id: listing.Listing_ID.toString(),
+            title: listing.Title || '',
+            price: price,
+            size: listing.Area ? `${listing.Area} م²` : '',
+            location: `منطقة ${listing.zone_id || '1'}`,
+            image: imageSource,
+            businessName: listing.Title || '',
+            businessType: 'property',
+            latitude: listing.Latitude,
+            longitude: listing.Longitude,
+            zone_id: listing.zone_id,
+            originalData: listing
           };
           
-          const imageKey = businessTypeImages[businessType] || 
-            `../assets/images/dummy${Math.floor(Math.random() * 4) + 1}.png`;
-          
-          // Generate a random price
-          const randomPrice = Math.floor(Math.random() * (100000 - 25000 + 1)) + 25000;
-          const formattedPrice = new Intl.NumberFormat('ar-SA').format(randomPrice);
-          
-          const formattedBusiness: MarketplaceItem = {
-            id: business.business_id.toString(),
-            title: business.rating || '0.0',
-            price: `${formattedPrice} ريال / سنة`,
-            size: business.user_ratings_total ? `${business.user_ratings_total}` : '0',
-            location: `منطقة ${business.zone_id || '1'}`,
-            image: imageKey as keyof typeof images,
-            businessName: business.name,
-            businessType: business.business_type,
-            businessStatus: business.business_status,
-            originalData: business
-          };
-          
-          setPlace(formattedBusiness);
-          
-          // Fetch similar businesses (same business type)
-          fetchSimilarBusinesses(business.business_type);
+          setPlace(formattedListing);
         } else {
           console.error('No business found with ID:', id);
         }
@@ -111,62 +210,39 @@ export default function PlaceDetails() {
       }
     };
     
-    const fetchSimilarBusinesses = async (businessType: string) => {
-      try {
-        // Fetch similar businesses with the same type
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/Businesses?business_type=eq.${businessType}&limit=5`,
-          {
-            method: 'GET',
-            headers: {
-              'apikey': SUPABASE_ANON_KEY,
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-        
-        if (!response.ok) {
-          throw new Error(`Error fetching similar businesses: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data && data.length > 0) {
-          // Format similar businesses
-          const formattedSimilar = data.map((business: any) => {
-            const imageKey = `../assets/images/dummy${Math.floor(Math.random() * 4) + 1}.png`;
-            
-            return {
-              id: business.business_id.toString(),
-              title: business.rating || '0.0',
-              price: '',
-              size: '',
-              location: '',
-              image: imageKey as keyof typeof images,
-              businessName: business.name,
-              businessType: business.business_type
-            };
-          });
-          
-          setSimilarPlaces(formattedSimilar);
-        }
-      } catch (error) {
-        console.error('Error fetching similar businesses:', error);
-      }
-    };
+    // No similar properties feature as requested
     
     if (id) {
       fetchBusinessDetails();
     }
   }, [id]);
 
-  // Handler to show/hide heart/share icons in header
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  // Handler to show/hide heart/share icons in header (optimized with useCallback)
+  const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const y = event.nativeEvent.contentOffset.y;
     // Adjust 180 to the scroll position where you want the icons to appear
     setShowActionsInHeader(y > 180);
-  };
+  }, []);
+  
+  // Handler for image slider scrolling (optimized with useCallback and throttling)
+  const handleImageScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const currentIndex = Math.round(contentOffsetX / width);
+    if (currentIndex !== activeImageIndex && currentIndex >= 0 && currentIndex < propertyImages.length) {
+      setActiveImageIndex(currentIndex);
+    }
+  }, [activeImageIndex, propertyImages.length]);
+  
+  // Handler for toggling favorite status (optimized with useCallback)
+  const handleToggleFavorite = useCallback(() => {
+    if (!place) return;
+    
+    if (isFavorite(place.id)) {
+      removeFavorite(place.id);
+    } else {
+      addFavorite(place);
+    }
+  }, [place, isFavorite, addFavorite, removeFavorite]);
 
   // Show loading state while fetching data
   if (isLoading) {
@@ -247,20 +323,41 @@ export default function PlaceDetails() {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        {/* Image Slider */}
+        {/* Image Slider for multiple images - Optimized for performance */}
         <View style={styles.imageContainer}>
-          <ImageSlider 
-            data={[place]} 
-            currentIndex={0}
-            onSlideChange={() => {}}
-            sliderRef={sliderRef as React.RefObject<ScrollView>}
-          />
-          <View style={styles.imageIndicators}>
-            <View style={[styles.indicator, styles.activeIndicator]} />
-            <View style={styles.indicator} />
-            <View style={styles.indicator} />
-            <View style={styles.indicator} />
-          </View>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleImageScroll}
+            scrollEventThrottle={32}
+            removeClippedSubviews={true}
+            decelerationRate="fast"
+          >
+            {propertyImages.map((imgUrl, index) => {
+              // Only render images that are near the active image position
+              const shouldRender = Math.abs(index - activeImageIndex) < 2;
+              return (
+                <View key={`detail-image-container-${index}`} style={{ width, height: '100%' }}>
+                  {shouldRender && (
+                    <OptimizedDetailImage uri={imgUrl} index={index} />
+                  )}
+                </View>
+              );
+            })}
+          </ScrollView>
+          
+          {/* Image pagination dots - Optimized with memoized components */}
+          {propertyImages.length > 1 && (
+            <View style={styles.imageIndicators}>
+              {propertyImages.map((_, index) => (
+                <DetailPaginationDot
+                  key={`detail-dot-${index}`}
+                  active={index === activeImageIndex}
+                />
+              ))}
+            </View>
+          )}
         </View>
 
         {/* Content Card */}
@@ -287,45 +384,30 @@ export default function PlaceDetails() {
                 <Image source={icons.share} style={styles.actionIcon} />
               </TouchableOpacity>
             </View>
-            <Text style={styles.title}>{place.businessName || `محل رقم ${place.id}`}</Text>
+            <Text style={styles.title}>{place.title || `عقار رقم ${place.id}`}</Text>
           </View>
 
-          {/* Business Type and Rating */}
+          {/* Property Type */}
           <View style={styles.rightAlign}>
-            <Text style={styles.businessTypeText}>{place.businessType || 'متجر'}</Text>
-            <Text style={styles.ratingText}>⭐ {place.title}</Text>
+            <Text style={styles.businessTypeText}>عقار</Text>
           </View>
 
-          {/* Price */}
-          <Text style={styles.price}>{place.price}</Text>
+          {/* Price with Saudi Riyal Symbol */}
+          <View style={styles.priceContainer}>
+            <Image source={saudiRiyalSymbol} style={styles.riyalSymbol} resizeMode="contain" />
+            <Text style={styles.price}>{place.price ? place.price.toString().replace('ريال', '').trim() : ''}</Text>
+          </View>
 
           {/* Location and Size */}
           <Text style={styles.location}>{place.location}</Text>
-          <Text style={styles.size}>تقييمات المستخدمين: {place.size}</Text>
+          <Text style={styles.areaSize}>{place.size}</Text>
+          
+          {/* Coordinates if available */}
+          {place.latitude && place.longitude && (
+            <Text style={styles.coordinates}>الإحداثيات: {place.latitude}, {place.longitude}</Text>
+          )}
 
-          {/* Contact Number */}
-          <Text style={styles.phone}>050 123 4567</Text>
-
-          {/* Similar Properties Section */}
-          <View style={styles.similarSection}>
-            <Text style={styles.similarTitle}>متاجر مشابهة</Text>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              style={styles.similarScrollView}
-            >
-              {similarPlaces.map((item: MarketplaceItem) => (
-                <TouchableOpacity 
-                  key={item.id} 
-                  style={styles.similarItem}
-                  onPress={() => router.push({ pathname: '/placeDetails', params: { id: item.id } })}
-                >
-                  <Image source={images[item.image as ImageKeyType]} style={styles.similarImage} />
-                  <Text style={styles.similarName}>{item.businessName}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
+          {/* No similar properties section as requested */}
         </View>
       </ScrollView>
     </View>
@@ -489,40 +571,42 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: 'right',
   },
+  areaSize: {
+    fontSize: 16,
+    color: '#1C64F2',
+    fontWeight: '500',
+    marginBottom: 10,
+    textAlign: 'right',
+  },
+  coordinates: {
+    fontSize: 14,
+    color: '#64748B',
+    marginBottom: 15,
+    textAlign: 'right',
+  },
   phone: {
     fontSize: 16,
     color: '#666',
     marginBottom: 600,
     textAlign: 'right',
   },
-  similarSection: {
-    marginTop: 20,
-  },
-  similarTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 15,
-    textAlign: 'right',
-  },
-  similarScrollView: {
-    marginBottom: 20,
-  },
-  similarItem: {
-    width: 200,
-    height: 150,
-    marginRight: 10,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  similarImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
+  // Similar properties styles removed as requested
   rightAlign: { flexDirection: "column", alignItems: "flex-end", marginBottom: 10 },
   // Business details styles
   businessTypeText: { fontSize: 16, color: "#4CAF50", fontWeight: "bold", textAlign: "right" },
   ratingText: { fontSize: 18, color: "#F5A623", fontWeight: "bold", textAlign: "right", marginTop: 4 },
   similarName: { fontSize: 12, color: "#666", textAlign: "center", marginTop: 4 },
+  // Saudi Riyal Symbol styles
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginBottom: 15,
+  },
+  riyalSymbol: {
+    width: 16,
+    height: 16,
+    marginRight: 5,
+    marginBottom: 14,
+  },
 });

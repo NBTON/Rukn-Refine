@@ -17,6 +17,7 @@ import { useColorScheme } from "@/components/useColorScheme";
 import ReanimatedConfig from "@/components/ReanimatedConfig";
 import { AuthProvider } from "@/src/context/AuthContext";
 import { FavoritesProvider } from "@/src/context/FavoritesContext";
+import { FilterProvider } from "@/src/context/FilterContext";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -61,19 +62,21 @@ function RootLayoutNav() {
   return (
     <AuthProvider>
       <FavoritesProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="(auth)"
-                options={{ presentation: "modal", headerShown: false }}
-              />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="chatScreen" options={{ headerShown: false }} />
-            </Stack>
-          </ThemeProvider>
-        </GestureHandlerRootView>
+        <FilterProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+              <Stack>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="(auth)"
+                  options={{ presentation: "modal", headerShown: false }}
+                />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="chatScreen" options={{ headerShown: false }} />
+              </Stack>
+            </ThemeProvider>
+          </GestureHandlerRootView>
+        </FilterProvider>
       </FavoritesProvider>
     </AuthProvider>
   );

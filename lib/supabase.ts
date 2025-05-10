@@ -49,6 +49,193 @@ export const supabaseApi = {
     }
   },
   
+  // Fetch from Listings table
+  async fetchListings(page = 1, pageSize = 20) {
+    try {
+      const startRange = (page - 1) * pageSize;
+      
+      console.log('Fetching data from Listings table');
+      console.log('Page:', page, 'Page size:', pageSize, 'Offset:', startRange);
+      
+      // Direct query to the Listings table with exact column names as in the database
+      const response = await fetch(
+        `${EXPO_PUBLIC_SUPABASE_URL}/rest/v1/Listings?select=Listing_ID,Title,Price,Area,Images,zone_id,Latitude,Longitude&order=Listing_ID.asc&limit=${pageSize}&offset=${startRange}`,
+        {
+          method: 'GET',
+          headers: {
+            'apikey': EXPO_PUBLIC_SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache', // Ensure we don't get cached data
+            'Prefer': 'return=representation' // Return full representation of the data
+          }
+        }
+      );
+      
+      console.log('Listings data response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error fetching from Listings table:', errorText);
+        throw new Error(`Error fetching listings data: ${response.status} - ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Fetched listings count:', data.length);
+      
+      if (data.length > 0) {
+        console.log('Listing data example:', JSON.stringify(data[0]));
+        // Detailed logging of the Images field to understand its structure
+        console.log('Images field type:', typeof data[0].Images);
+        console.log('Images field value:', data[0].Images);
+        if (data[0].Images) {
+          console.log('Is Images an array?', Array.isArray(data[0].Images));
+          if (Array.isArray(data[0].Images)) {
+            console.log('Images array length:', data[0].Images.length);
+            console.log('First image value:', data[0].Images[0]);
+          } else if (typeof data[0].Images === 'string') {
+            console.log('Images is a string value');
+          }
+        }
+        // Define interface for Listing data from database
+        interface ListingData {
+          Listing_ID: number;
+          Title?: string;
+          Price?: number;
+          Area?: number;
+          Images?: string[] | string | any;
+          processedImages?: string[];
+          zone_id?: string;
+          Latitude?: string;
+          Longitude?: string;
+        }
+        
+        // Format the data to match our MarketplaceItem structure
+        return data.map((listing: ListingData) => {
+          // Handle images - determine the appropriate image source
+          // Handle images from the database, regardless of format
+          let imageSource: string;
+          
+          // Debug information about the Images field
+          console.log(`Listing ${listing.Listing_ID} Images field:`, listing.Images);
+          
+          try {
+            // Check if Images exists in any form
+            if (listing.Images) {
+              // Handle array format
+              if (Array.isArray(listing.Images) && listing.Images.length > 0) {
+                imageSource = listing.Images[0];
+                console.log(`Using image from array for listing ${listing.Listing_ID}:`, imageSource);
+              }
+              // Handle JSON string format (might be stored as a string in the database)
+              else if (typeof listing.Images === 'string') {
+                const imagesString = listing.Images as string; // Cast to string for TypeScript
+                // Check if the string contains pipe-separated URLs
+                if (imagesString.includes(' | ') || imagesString.includes('|')) {
+                  // Handle pipe-separated URLs
+                  const imageUrls = imagesString.split(/\s*\|\s*/).filter(url => url.includes('http'));
+                  if (imageUrls.length > 0) {
+                    // Store all image URLs 
+                    listing.processedImages = imageUrls;
+                    // Use the first one as the main image source
+                    imageSource = imageUrls[0];
+                    console.log(`Found ${imageUrls.length} pipe-separated images for listing ${listing.Listing_ID}, using first:`, imageSource);
+                  } else {
+                    imageSource = 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+                  }
+                }
+                // Try to parse it if it looks like JSON
+                else if (imagesString.startsWith('[') && imagesString.includes('"')) {
+                  try {
+                    const parsedImages = JSON.parse(imagesString);
+                    if (Array.isArray(parsedImages) && parsedImages.length > 0) {
+                      // Store all parsed images
+                      listing.processedImages = parsedImages;
+                      imageSource = parsedImages[0];
+                      console.log(`Using image from parsed JSON for listing ${listing.Listing_ID}:`, imageSource);
+                    } else {
+                      // If not an array or empty, use the string directly if it looks like a URL
+                      imageSource = imagesString.includes('http') ? imagesString : 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+                      console.log(`Using direct string for listing ${listing.Listing_ID}:`, imageSource);
+                    }
+                  } catch (e) {
+                    // If parsing fails, use the string directly if it looks like a URL
+                    imageSource = imagesString.includes('http') ? imagesString : 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+                    console.log(`Failed to parse JSON, using direct string for listing ${listing.Listing_ID}:`, imageSource);
+                  }
+                } else {
+                  // Use the string directly if it doesn't look like JSON
+                  imageSource = imagesString.includes('http') ? imagesString : 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+                  console.log(`Using direct string for listing ${listing.Listing_ID}:`, imageSource);
+                }
+              }
+              // Handle object format
+              else if (typeof listing.Images === 'object' && listing.Images !== null) {
+                try {
+                  // Try to extract a URL from the object
+                  const imagesObject = listing.Images as Record<string, any>;
+                  const possibleImageUrl = Object.values(imagesObject).find(val => 
+                    typeof val === 'string' && val.includes('http'));
+                  
+                  if (possibleImageUrl && typeof possibleImageUrl === 'string') {
+                    imageSource = possibleImageUrl;
+                    console.log(`Using image from object for listing ${listing.Listing_ID}:`, imageSource);
+                  } else {
+                    imageSource = 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+                    console.log(`No valid image URL in object for listing ${listing.Listing_ID}`);
+                  }
+                } catch (error) {
+                  console.error(`Error extracting image from object for listing ${listing.Listing_ID}:`, error);
+                  imageSource = 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+                }
+              } else {
+                imageSource = 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+                console.log(`Unknown Images field format for listing ${listing.Listing_ID}`);
+              }
+            } else {
+              // No Images field present
+              imageSource = 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+              console.log(`No Images field for listing ${listing.Listing_ID}`);
+            }
+          } catch (error) {
+            // Handle any unexpected errors
+            console.error(`Error processing image for listing ${listing.Listing_ID}:`, error);
+            imageSource = 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+          }
+          
+          // Final check to ensure we have a valid URL
+          if (!imageSource || !imageSource.includes('http')) {
+            imageSource = 'https://images.aqar.fm/webp/350x0/props/placeholder.jpg';
+            console.log(`Using fallback image for listing ${listing.Listing_ID} as the extracted URL is invalid`);
+          }
+          
+          return {
+            id: listing.Listing_ID.toString(),
+            title: listing.Title || '',
+            price: listing.Price ? `${listing.Price} ريال` : '',
+            size: listing.Area ? `${listing.Area} م²` : null,
+            location: listing.zone_id ? `منطقة ${listing.zone_id}` : '',
+            image: imageSource,
+            businessName: listing.Title || '',
+            businessType: 'property',
+            latitude: listing.Latitude,
+            longitude: listing.Longitude,
+            zone_id: listing.zone_id,
+            // Add additional fields needed for MarketplaceItem
+            originalData: listing // Store the original data
+          };
+        });
+      } else {
+        console.warn('No listings data returned from Supabase');
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching listings:', error);
+      throw error;
+    }
+  },
+  
+  
   // Direct fetch from the Businesses table in Supabase
   async fetchBusinesses(page = 1, pageSize = 20): Promise<any[]> {
     try {

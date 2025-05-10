@@ -13,7 +13,7 @@ const ideaHeader: FC = () => {
                     <Image style={styles.icon} source={icons.idea} />
                     <View style={styles.textColumn}>
                         <Text style={styles.filterText}>Selected Idea</Text>
-                        <Text style={styles.subText}>flower shop</Text>
+                        <Text style={styles.subText}>No type selected</Text>
                     </View>
                 </TouchableOpacity>
             </View>
