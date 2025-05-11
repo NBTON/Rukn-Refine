@@ -73,7 +73,7 @@ Create a `.env` file in your root directory with the following:
 
     git clone https://github.com/MQHANAD/RuknApp.git
     cd RuknApp
-    npm install
+    npm install --legacy-peer-deps
 
 ### 2. Run the app
 
