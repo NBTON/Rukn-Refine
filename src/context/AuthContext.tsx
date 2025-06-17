@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { supabaseApi, UserProfile } from '../../lib/supabase';
+import { supabaseApi, UserProfile } from '../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 

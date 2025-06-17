@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, Dimensions, ActivityIndicator, TouchableOpacity, Linking, Platform, ScrollView } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { MaterialIcons } from '@expo/vector-icons';
-import { EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY } from '../../lib/supabase';
+import { EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY } from '../src/lib/supabase';
 import { fetchZoneRecommendations, fetchRecommendedListings } from '../../src/utils/zoneRecommendations';
 import { BusinessType } from '../../src/context/FilterContext';
 
