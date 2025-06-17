@@ -3,7 +3,7 @@ import React, { FC, useState, useRef, memo, useMemo, useCallback } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from "react-native";
 import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { MarketplaceItem, images } from "./types";
-import { icons } from "@/constants";
+import { icons } from "@/src/constants";
 import { useRouter } from 'expo-router';
 import { useFavorites } from "../src/context/FavoritesContext";
 

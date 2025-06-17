@@ -17,8 +17,7 @@ const PhoneVerificationScreen = () => {
   // e.g., const [phoneNumber, setPhoneNumber] = useState('');
 
   const handleSendVerification = () => {
-    // TODO: Add your verification code sending logic here
-    // e.g., sendVerificationCode(phoneNumber);
+    // TODO: integrate real verification logic
     console.log("Verification code sent");
     router.replace("/Verification")
   };
