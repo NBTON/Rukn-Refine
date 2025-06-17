@@ -1,7 +1,7 @@
 // zoneRecommendations.ts - Algorithm for recommending the best zones for different business types
 
 import { BusinessType as FilterBusinessType } from '../context/FilterContext';
-import { EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY } from '../../lib/supabase';
+import { EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY } from '../lib/supabase';
 
 // Define weights for different business types
 // These weights determine how important each factor is for each business type

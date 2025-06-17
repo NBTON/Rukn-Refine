@@ -17,7 +17,7 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { router } from "expo-router";
 // Using React Native's built-in APIs for image selection
-import { supabaseApi, UserProfile, UserRole } from "../../lib/supabase";
+import { supabaseApi, UserProfile, UserRole } from "../src/lib/supabase";
 
 // No top bar height needed
 

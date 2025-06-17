@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import {
   Animated,
   Dimensions,
@@ -10,7 +10,9 @@ import {
   View,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  ActivityIndicator,
 } from "react-native";
+import { useAuth } from "@/src/context/AuthContext";
 
 const { width, height } = Dimensions.get("window");
 const BOTTOM_OVERLAY_HEIGHT = height * 0.4;
@@ -115,8 +117,7 @@ const OnboardingScreen = () => {
 
   // Navigation function when pressing the "Get Started" button.
   const handleGetStarted = () => {
-    // Optionally, add tracking or validations before navigating.
-    //router.push("/(tabs)/home");
+    // Navigate to sign in screen
     router.push("/sign-in");
   };
 
@@ -181,6 +182,12 @@ const OnboardingScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
@@ -263,6 +270,27 @@ const styles = StyleSheet.create({
   },
 });
 
-const App = () => <OnboardingScreen />;
+const App = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      // If user is authenticated, redirect to the main app tabs
+      router.replace("/(tabs)/profile");
+    }
+  }, [isAuthenticated, isLoading]);
+
+  // Show loading indicator while authentication state is being determined
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#F5A623" />
+      </View>
+    );
+  }
+
+  // If not authenticated, show the onboarding screen
+  return <OnboardingScreen />;
+};
 
 export default App;
