@@ -15,7 +15,7 @@ import {
   Modal,
   SafeAreaView,
 } from "react-native";
-import { supabaseApi, UserRole } from '../../lib/supabase';
+import { supabaseApi, UserRole } from '../src/lib/supabase';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuth } from '@/src/context/AuthContext';
 

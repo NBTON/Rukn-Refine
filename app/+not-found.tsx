@@ -13,7 +13,7 @@ import {
 import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { MARKETPLACES, MarketplaceItem, images } from '../components/types';
 import ImageSlider from '../components/ImageSlider';
-import { icons } from '@/constants';
+import { icons } from '@/src/constants';
 
 const { width } = Dimensions.get('window');
 

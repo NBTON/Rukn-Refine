@@ -31,39 +31,15 @@ RuknApp/
 │   ├── utils/          # Backend utilities
 │   ├── server.js       # Server entry point
 │   └── ...             # Configuration files
-├── components/         # UI components (DUPLICATED)
-│   ├── EditScreenInfo.tsx
-│   ├── ExternalLink.tsx
-│   ├── FilterHeader.tsx
-│   ├── FixedHeaderOverlay.tsx
-│   ├── ImageSlider.tsx
-│   ├── MarketCard.tsx
-│   ├── SearchBar.tsx
-│   ├── StyledText.tsx
-│   ├── Themed.tsx
-│   ├── ideaHeader.tsx
-│   ├── types.tsx
-│   ├── useColorScheme.ts
-│   └── ...
-├── constants/          # Application constants
-│   ├── Colors.ts       # Color definitions
-│   ├── icons.js        # Icon definitions
-│   └── index.js        # Exports
-├── lib/                # Libraries and utilities
-│   ├── supabase.ts     # Supabase client
-│   └── supabaseSetup.ts # Supabase configuration
-├── src/                # Source code directory
+├── src/                # Main source code directory
+│   ├── components/     # Reusable UI components
+│   ├── constants/      # Application constants
 │   ├── context/        # React context providers
-│   │   ├── AuthContext.tsx
-│   │   └── FavoritesContext.tsx
 │   ├── hooks/          # Custom React hooks
-│   ├── navigation/     # Navigation components
-│   ├── screens/        # Application screens (some duplicated with app/)
-│   │   ├── chatScreen.tsx
-│   │   ├── index.tsx
-│   │   └── placeDetails.tsx
-│   ├── utils/          # Utility functions
-│   └── README.md       # Source code documentation
+│   ├── lib/            # Libraries and utilities
+│   ├── navigation/     # Navigation configuration
+│   ├── screens/        # Application screens
+│   └── utils/          # Utility functions
 ├── types/              # TypeScript type definitions
 ├── app.json            # Expo app configuration
 ├── babel.config.js     # Babel configuration

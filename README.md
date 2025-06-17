@@ -81,6 +81,25 @@ Create a `.env` file in your root directory with the following:
 
     npx expo start
 
+## 📂 Project Structure
+
+```
+app/                # Expo Router pages
+assets/             # Static images and fonts
+backend/            # Node.js server code
+src/                # Main application source
+  ├── components/   # Reusable UI components
+  ├── constants/    # Shared constants
+  ├── context/      # React context providers
+  ├── lib/          # Utilities and API wrappers
+  ├── navigation/   # Navigation configuration
+  ├── screens/      # Screen implementations
+  └── utils/        # Helper functions
+types/              # TypeScript definitions
+```
+
+See [`PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md) for more details.
+
 ---
 
 ## 👥 Team Members
