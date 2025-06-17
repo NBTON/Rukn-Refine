@@ -81,6 +81,11 @@ Create a `.env` file in your root directory with the following:
 
     npx expo start
 
+The command opens the Expo developer tools in your browser. Install **Expo Go**
+from the iOS App Store or Google Play, then scan the QR code displayed in the
+browser to launch the app on your device. Use `npx expo start --tunnel` if your
+phone is on a different network.
+
 ## 📂 Project Structure
 
 ```
