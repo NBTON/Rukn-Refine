@@ -34,8 +34,13 @@ app.use('/auth', authRoutes);
 // مثال على استخدام حماية المسارات بواسطة ميدلوير المصادقة
 // app.use('/api/protected', checkAuth, protectedRoutes);
 
-// بدء الخادم
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`الخادم يعمل على المنفذ ${PORT}`);
-});
+// بدء الخادم فقط إذا تم تشغيل الملف مباشرةً
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`الخادم يعمل على المنفذ ${PORT}`);
+  });
+}
+
+// تصدير التطبيق لاستخدامه في الاختبارات
+module.exports = app;
