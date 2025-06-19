@@ -108,6 +108,13 @@ types/              # TypeScript definitions
 
 See [`PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md) for more details.
 
+## 📖 Backend Documentation
+
+The backend instructions are available in both Arabic and English:
+
+- [Arabic](backend/README.md)
+- [English](backend/README_EN.md)
+
 ---
 
 ## 👥 Team Members
