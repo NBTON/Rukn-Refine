@@ -210,7 +210,9 @@ export default function PlaceDetails() {
       }
     };
     
-    // No similar properties feature as requested
+
+    // Fetch business details only
+
     
     if (id) {
       fetchBusinessDetails();
@@ -407,7 +409,9 @@ export default function PlaceDetails() {
             <Text style={styles.coordinates}>الإحداثيات: {place.latitude}, {place.longitude}</Text>
           )}
 
-          {/* No similar properties section as requested */}
+
+          {/* Similar properties section could go here */}
+
         </View>
       </ScrollView>
     </View>
@@ -590,7 +594,9 @@ const styles = StyleSheet.create({
     marginBottom: 600,
     textAlign: 'right',
   },
-  // Similar properties styles removed as requested
+
+  // Styles for potential similar properties section
+
   rightAlign: { flexDirection: "column", alignItems: "flex-end", marginBottom: 10 },
   // Business details styles
   businessTypeText: { fontSize: 16, color: "#4CAF50", fontWeight: "bold", textAlign: "right" },

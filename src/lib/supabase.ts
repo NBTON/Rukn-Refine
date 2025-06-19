@@ -357,7 +357,9 @@ export const supabaseApi = {
           ? businessTypeImages[business.business_type]
           : `../assets/images/dummy${Math.floor(Math.random() * 4) + 1}.png`;
         
+
         // Generate a random price between 25,000 and 100,000 as requested
+
         const randomPrice = Math.floor(Math.random() * (100000 - 25000 + 1)) + 25000;
         const formattedPrice = new Intl.NumberFormat('ar-SA').format(randomPrice);
         
