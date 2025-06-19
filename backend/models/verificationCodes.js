@@ -1,8 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 
 // u0625u0639u062fu0627u062f Supabase
-const supabaseUrl = process.env.SUPABASE_URL || 'https://vnvbjphwulwpdzfieyyo.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZudmJqcGh3dWx3cGR6ZmlleXlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5NDA2ODcsImV4cCI6MjA2MTUxNjY4N30.qfTs0f4Y5dZIc4hlmitfhe0TOI1fFbdEAK1_9wxzTxY';
+const { supabaseUrl, supabaseKey } = require("../config");
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // u062fu0627u0644u0629 u0644u0625u0646u0634u0627u0621 u0631u0645u0632 u062au062du0642u0642 u0639u0634u0648u0627u0626u064a
