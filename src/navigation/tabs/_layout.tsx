@@ -1,7 +1,7 @@
 import { View, Image, Text } from "react-native";
 import React, { useState } from "react";
 import { Tabs } from "expo-router";
-import { icons } from "../../constants";
+import { icons } from "@/src/constants";
 
 interface TabIconProps {
   icon: any; // The source of the icon (e.g., from require() or a URI)
