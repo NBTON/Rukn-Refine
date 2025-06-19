@@ -21,12 +21,12 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import SearchBar from "../../components/SearchBar";
-import ImageSlider from "../../components/ImageSlider";
-import MarketCard from "../../components/MarketCard";
-import FixedHeaderOverlay from "../../components/FixedHeaderOverlay";
-import FilterHeader from "../../components/FilterHeader";
-import { MarketplaceItem, images } from "../../components/types";
+import SearchBar from "@/src/components/SearchBar";
+import ImageSlider from "@/src/components/ImageSlider";
+import MarketCard from "@/src/components/MarketCard";
+import FixedHeaderOverlay from "@/src/components/FixedHeaderOverlay";
+import FilterHeader from "@/src/components/FilterHeader";
+import { MarketplaceItem, images } from "@/src/components/types";
 import { supabase } from "../../src/utils/supabase";
 import { supabaseApi } from "../src/lib/supabase";
 import { setupSupabase, getMockMarketplaces } from "../src/lib/supabaseSetup";

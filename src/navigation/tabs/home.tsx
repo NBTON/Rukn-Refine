@@ -18,12 +18,12 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import SearchBar from "../../components/SearchBar";
-import ImageSlider from "../../components/ImageSlider";
-import MarketCard from "../../components/MarketCard";
-import FixedHeaderOverlay from "../../components/FixedHeaderOverlay";
-import FilterHeader from "../../components/FilterHeader";
-import { MARKETPLACES, MarketplaceItem, images } from "../../components/types";
+import SearchBar from "@/src/components/SearchBar";
+import ImageSlider from "@/src/components/ImageSlider";
+import MarketCard from "@/src/components/MarketCard";
+import FixedHeaderOverlay from "@/src/components/FixedHeaderOverlay";
+import FilterHeader from "@/src/components/FilterHeader";
+import { MARKETPLACES, MarketplaceItem, images } from "@/src/components/types";
 
 const { width, height } = Dimensions.get("window");
 const HEADER_HEIGHT = 300; // Height reserved for the image slider
