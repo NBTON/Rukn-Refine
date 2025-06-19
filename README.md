@@ -65,6 +65,9 @@ Create a `.env` file in your root directory with the following:
 
 **Important:** Do **not** upload your real `.env` file to GitHub.
 
+The backend server also uses environment variables. Copy `backend/.env.example`
+to `backend/.env` and fill in your own values.
+
 ---
 
 ## 🚀 Getting Started
