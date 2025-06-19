@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MarketplaceItem } from '../../components/types';
+import { MarketplaceItem } from '@/src/components/types';
 import { useAuth } from './AuthContext';
 
 // Define the shape of our context

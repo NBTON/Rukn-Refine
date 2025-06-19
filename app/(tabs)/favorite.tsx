@@ -14,10 +14,10 @@ import {
   Image,
   Text,
 } from "react-native";
-import SearchBar from "../../components/SearchBar";
-import MarketCard from "../../components/MarketCard";
-import IdeaHeader from "../../components/ideaHeader";
-import { MarketplaceItem, images } from "../../components/types";
+import SearchBar from "@/src/components/SearchBar";
+import MarketCard from "@/src/components/MarketCard";
+import IdeaHeader from "@/src/components/ideaHeader";
+import { MarketplaceItem, images } from "@/src/components/types";
 import { useFavorites } from "../../src/context/FavoritesContext";
 
 const { width, height } = Dimensions.get("window");

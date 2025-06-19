@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { MarketplaceItem } from '../../components/types';
+import { MarketplaceItem } from '@/src/components/types';
 import { fetchRecommendedListings, fetchZoneRecommendations, ZoneRecommendation } from '../utils/zoneRecommendations';
 
 // Define filter state types
