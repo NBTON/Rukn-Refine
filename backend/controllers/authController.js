@@ -3,8 +3,7 @@ const verificationCodes = require('../models/verificationCodes');
 const smsService = require('../utils/smsService');
 
 // u0625u0639u062fu0627u062f Supabase
-const supabaseUrl = process.env.SUPABASE_URL || 'https://vnvbjphwulwpdzfieyyo.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZudmJqcGh3dWx3cGR6ZmlleXlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5NDA2ODcsImV4cCI6MjA2MTUxNjY4N30.qfTs0f4Y5dZIc4hlmitfhe0TOI1fFbdEAK1_9wxzTxY';
+const { supabaseUrl, supabaseKey } = require("../config");
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // u062au0633u062cu064au0644 u0645u0633u062au062eu062fu0645 u062cu062fu064au062f

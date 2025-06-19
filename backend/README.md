@@ -22,13 +22,14 @@ npm install
 
 ```
 PORT=3000
+
 SUPABASE_URL=your_supabase_url
 SUPABASE_KEY=your_supabase_key
 TWILIO_ACCOUNT_SID=your_twilio_account_sid
 TWILIO_AUTH_TOKEN=your_twilio_auth_token
 TWILIO_PHONE_NUMBER=your_twilio_phone_number
 FRONTEND_URL=http://localhost:3000
-```
+
 
 3. u0642u0645 u0628u062au0634u063au064au0644 u0627u0644u062eu0627u062fu0645:
 
