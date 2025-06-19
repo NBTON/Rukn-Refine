@@ -18,12 +18,16 @@ cd backend
 npm install
 ```
 
-2. u0642u0645 u0628u0625u0646u0634u0627u0621 u0645u0644u0641 `.env` u0641u064a u0645u062cu0644u062f `backend` u0648u0623u0636u0641 u0645u0627 u064au0644u064a:
+2. u0642u0645 u0646u0633u062e u0627u0644u0645u0644u0641 `.env.example` إu0644u0649 `.env` في u0645u062cu0644u062f `backend` ثم u0639دّل الu0642u064au0645:
 
 ```
 PORT=3000
-SUPABASE_URL=https://cycncelsoqthdpabozhk.supabase.co
-SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN5Y25jZWxzb3F0aGRwYWJvemhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI3NDgxMTAsImV4cCI6MjA1ODMyNDExMH0.taUNLQcBAB9p3bRyF-kbHttGibDtFJzqKiXxVl_mAJ0
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_PHONE_NUMBER=your_twilio_phone_number
+FRONTEND_URL=http://localhost:3000
 ```
 
 3. u0642u0645 u0628u062au0634u063au064au0644 u0627u0644u062eu0627u062fu0645:

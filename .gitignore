@@ -61,3 +61,4 @@ ios/build/
 # Environment files
 .env
 .env.*
+!backend/.env.example
